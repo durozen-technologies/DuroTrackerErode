@@ -15,23 +15,29 @@ class Sale(Base, BaseModelMixin):
     party_id: Mapped[UUID] = mapped_column(ForeignKey("parties.id"), nullable=False, index=True)
     
     date: Mapped[date] = mapped_column(Date, nullable=False)
-    vehicle_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    driver_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     
-    weight: Mapped[float] = mapped_column(Numeric(10, 2), default=0.0)
-    weight_rate: Mapped[float] = mapped_column(Numeric(10, 2), default=0.0)
-    weight_amount: Mapped[float] = mapped_column(Numeric(12, 2), default=0.0)
-    
-    boxes: Mapped[int] = mapped_column(Integer, default=0)
-    birds_per_box: Mapped[int] = mapped_column(Integer, default=0)
-    actual_birds: Mapped[int] = mapped_column(Integer, default=0)
-    box_rate: Mapped[float] = mapped_column(Numeric(10, 2), default=0.0)
-    box_amount: Mapped[float] = mapped_column(Numeric(12, 2), default=0.0)
-    
-    total_invoice_amount: Mapped[float] = mapped_column(Numeric(12, 2), default=0.0)
-    
+    total_amount: Mapped[float] = mapped_column(Numeric(12, 2), default=0.0)
     cash_payment: Mapped[float] = mapped_column(Numeric(12, 2), default=0.0)
     upi_payment: Mapped[float] = mapped_column(Numeric(12, 2), default=0.0)
     balance_amount: Mapped[float] = mapped_column(Numeric(12, 2), default=0.0)
+    driver_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    vehicle_number: Mapped[str | None] = mapped_column(String, nullable=True)
 
     party = relationship("Party", back_populates="sales")
+    items = relationship("SaleItem", back_populates="sale", cascade="all, delete-orphan")
+
+
+class SaleItem(Base, BaseModelMixin):
+    __tablename__ = "sale_items"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, index=True, default=uuid7)
+    sale_id: Mapped[UUID] = mapped_column(ForeignKey("sales.id"), nullable=False, index=True)
+    item_id: Mapped[UUID] = mapped_column(ForeignKey("items.id"), nullable=False, index=True)
+    
+    quantity: Mapped[float] = mapped_column(Numeric(10, 2), default=0.0)
+    count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    rate: Mapped[float] = mapped_column(Numeric(10, 2), default=0.0)
+    amount: Mapped[float] = mapped_column(Numeric(12, 2), default=0.0)
+
+    sale = relationship("Sale", back_populates="items")
+    item = relationship("Item", back_populates="sale_items")

@@ -1,550 +1,329 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, Platform } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Save, Truck, Box, Scale, Calculator, Banknote, Edit2, Pencil, Trash2 } from 'lucide-react-native';
+import { ArrowLeft, Save, Plus, Trash2, Truck } from 'lucide-react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Picker } from '@react-native-picker/picker';
 import client from '../api/client';
 
+type Line = {
+  item_id: string;
+  quantity: string;
+  count: string;
+  rate: string;
+};
+
+function emptyLine(): Line {
+  return { item_id: '', quantity: '', count: '', rate: '' };
+}
+
 export default function NewPurchaseScreen({ navigation, route }: any) {
   const queryClient = useQueryClient();
   const editData = route.params?.editData;
-  const [isEditing, setIsEditing] = useState(!editData);
 
-  const [form, setForm] = useState({
-    date: editData?.date || new Date().toISOString().split('T')[0],
-    supplier_id: editData?.party_id || '',
-    driver_name: editData?.driver_name || '',
-    vehicle_number: editData?.vehicle_number || '',
-    total_boxes: editData?.total_boxes?.toString() || '',
-    birds_per_box: editData?.birds_per_box?.toString() || '',
-    adjustment: '',
-    actual_birds: editData?.actual_birds?.toString() || '',
-    weighbridge_weight: editData?.weighbridge_weight?.toString() || '',
-    net_weight: editData?.net_weight?.toString() || '',
-    purchase_rate: editData?.purchase_rate?.toString() || '',
-    total_amount: editData?.purchase_amount?.toString() || '',
-    cash_payment: editData?.cash_payment?.toString() || '',
-    upi_payment: editData?.upi_payment?.toString() || '',
-    empty_bird_weight_g: '40',
-    remarks: editData?.remarks || ''
-  });
+  const [date, setDate] = useState(editData?.date || new Date().toISOString().split('T')[0]);
+  const [partyId, setPartyId] = useState(editData?.party_id || '');
+  const [driverName, setDriverName] = useState(editData?.driver_name || '');
+  const [vehicleNumber, setVehicleNumber] = useState(editData?.vehicle_number || '');
+  const [cash, setCash] = useState(String(editData?.cash_payment ?? ''));
+  const [upi, setUpi] = useState(String(editData?.upi_payment ?? ''));
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [lines, setLines] = useState<Line[]>(
+    editData?.items?.length
+      ? editData.items.map((i: any) => ({
+          item_id: i.item_id,
+          quantity: String(i.quantity ?? ''),
+          count: i.count != null ? String(i.count) : '',
+          rate: String(i.rate ?? ''),
+        }))
+      : [emptyLine()]
+  );
 
   const { data: parties } = useQuery({
-    queryKey: ['parties'],
-    queryFn: async () => {
-      const res = await client.get('/parties/');
-      return res.data;
-    }
+    queryKey: ['parties', 'SUPPLIER'],
+    queryFn: async () => (await client.get('/parties/?party_type=SUPPLIER')).data,
+  });
+  const { data: items } = useQuery({
+    queryKey: ['items'],
+    queryFn: async () => (await client.get('/items/')).data,
   });
 
-  const [isEditingBirds, setIsEditingBirds] = useState(false);
-  const [isEditingNetWeight, setIsEditingNetWeight] = useState(false);
-  const [isEditingGrams, setIsEditingGrams] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [errors, setErrors] = useState<any>({});
+  const itemMap = useMemo(() => {
+    const m: Record<string, any> = {};
+    (items || []).forEach((it: any) => {
+      m[it.id] = it;
+    });
+    return m;
+  }, [items]);
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '';
-    const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`;
+  const lineTotals = lines.map((l) => {
+    const qty = parseFloat(l.quantity) || 0;
+    const rate = parseFloat(l.rate) || 0;
+    return Math.round(qty * rate * 100) / 100;
+  });
+  const totalAmount = lineTotals.reduce((a, b) => a + b, 0);
+  const totalPaid = (parseFloat(cash) || 0) + (parseFloat(upi) || 0);
+  const balance = Math.round((totalAmount - totalPaid) * 100) / 100;
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ['purchases'] });
+    queryClient.invalidateQueries({ queryKey: ['items'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+    queryClient.invalidateQueries({ queryKey: ['parties'] });
   };
-
-  const handleVehicleNumberChange = (text: string) => {
-    let cleaned = text.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-    let formatted = '';
-    
-    if (cleaned.length > 0) {
-      formatted += cleaned.substring(0, 2);
-    }
-    if (cleaned.length > 2) {
-      formatted += '-' + cleaned.substring(2, 4);
-    }
-    if (cleaned.length > 4) {
-      const rest = cleaned.substring(4);
-      const match = rest.match(/^([A-Z]{1,2})(\d{0,4})/);
-      if (match) {
-        formatted += '-' + match[1];
-        if (match[2]) {
-          formatted += '-' + match[2];
-        }
-      } else {
-        formatted += '-' + rest;
-      }
-    }
-    setForm({...form, vehicle_number: formatted});
-    setErrors({...errors, vehicle_number: null});
-  };
-
-  React.useEffect(() => {
-    if (!isEditingBirds) {
-      const boxes = parseInt(form.total_boxes) || 0;
-      const birdsPerBox = parseInt(form.birds_per_box) || 0;
-      if (boxes > 0 || birdsPerBox > 0) {
-        setForm(f => ({ ...f, actual_birds: (boxes * birdsPerBox).toString() }));
-      }
-    }
-  }, [form.total_boxes, form.birds_per_box, isEditingBirds]);
-
-  React.useEffect(() => {
-    if (!isEditingNetWeight) {
-      const wBridge = parseFloat(form.weighbridge_weight) || 0;
-      const birds = parseInt(form.actual_birds) || 0;
-      if (wBridge > 0 || birds > 0) {
-        const emptyWeightKg = (parseFloat(form.empty_bird_weight_g) || 40) / 1000;
-        const net = wBridge - (birds * emptyWeightKg); 
-        setForm(f => ({ ...f, net_weight: Math.max(0, net).toFixed(2) }));
-      }
-    }
-  }, [form.weighbridge_weight, form.actual_birds, form.empty_bird_weight_g, isEditingNetWeight]);
-
-  React.useEffect(() => {
-    const net = parseFloat(form.net_weight) || 0;
-    const rate = parseFloat(form.purchase_rate) || 0;
-    if (net > 0 && rate > 0) {
-      setForm(f => ({ ...f, total_amount: (net * rate).toFixed(2) }));
-    }
-  }, [form.net_weight, form.purchase_rate]);
-
-  React.useEffect(() => {
-    if (!editData && parties && parties.length > 0 && form.supplier_id === '') {
-      const supplier = parties.find((p: any) => p.type === 'PURCHASER');
-      if (supplier) setForm(f => ({ ...f, supplier_id: supplier.id }));
-    }
-  }, [parties, editData]);
 
   const mutation = useMutation({
-    mutationFn: (purchaseData: any) => {
-      if (editData?.id) {
-        return client.put(`/purchases/${editData.id}`, purchaseData);
-      }
-      return client.post('/purchases/', purchaseData);
+    mutationFn: (payload: any) => {
+      if (editData?.id) return client.put(`/purchases/${editData.id}`, payload);
+      return client.post('/purchases/', payload);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
-      queryClient.invalidateQueries({ queryKey: ['parties'] });
-      queryClient.invalidateQueries({ queryKey: ['purchases'] });
-      Alert.alert("Success", `Purchase ${editData ? 'updated' : 'saved'} successfully`);
+    onSuccess: (res) => {
+      invalidate();
+      const alerts = res.data?.low_stock_alerts || [];
+      if (alerts.length) {
+        Alert.alert(
+          'Saved — Low Stock',
+          alerts.map((a: any) => `${a.item_name}: ${a.available} (min ${a.minimum})`).join('\n')
+        );
+      } else {
+        Alert.alert('Success', 'Purchase saved');
+      }
       navigation.goBack();
     },
     onError: (error: any) => {
-      let errorMsg = `Failed to ${editData ? 'update' : 'save'} purchase`;
-      if (error?.response?.data?.detail) {
-        if (typeof error.response.data.detail === 'string') {
-          errorMsg = error.response.data.detail;
-        } else if (Array.isArray(error.response.data.detail)) {
-          errorMsg = error.response.data.detail.map((e: any) => `${e.loc?.join('.')} ${e.msg}`).join('\n');
-        }
-      } else if (error?.message) {
-        errorMsg = error.message;
-      }
-      Alert.alert("Error", errorMsg);
-    }
+      const d = error?.response?.data?.detail;
+      Alert.alert('Error', typeof d === 'string' ? d : d?.message || 'Failed to save purchase');
+    },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => {
-      return client.delete(`/purchases/${editData.id}`);
-    },
+    mutationFn: () => client.delete(`/purchases/${editData.id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
-      queryClient.invalidateQueries({ queryKey: ['parties'] });
-      queryClient.invalidateQueries({ queryKey: ['purchases'] });
-      Alert.alert("Success", "Purchase deleted successfully");
+      invalidate();
       navigation.goBack();
     },
-    onError: (error: any) => {
-      Alert.alert("Error", "Failed to delete purchase");
-    }
   });
 
-  const handleDelete = () => {
-    Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this purchase? This will revert the party balance.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: () => deleteMutation.mutate() }
-      ]
-    );
+  const updateLine = (idx: number, patch: Partial<Line>) => {
+    setLines((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)));
   };
 
   const handleSave = () => {
-    const newErrors: any = {};
-    if (!form.supplier_id) newErrors.supplier_id = "Purchaser is required";
-    if (!form.driver_name) newErrors.driver_name = "Driver Name is required";
-    const vehicleRegex = /^[A-Za-z]{2}-\d{2}-[A-Za-z]{1,2}-\d{4}$/;
-    if (!form.vehicle_number) {
-      newErrors.vehicle_number = "Vehicle Number is required";
-    } else if (!vehicleRegex.test(form.vehicle_number)) {
-      newErrors.vehicle_number = "Format must be like MH-12-AB-1234";
-    }
-    if (!form.total_boxes || parseInt(form.total_boxes) <= 0) newErrors.total_boxes = "Total Boxes is required";
-    if (!form.birds_per_box || parseInt(form.birds_per_box) <= 0) newErrors.birds_per_box = "Birds Per Box is required";
-    if (!form.purchase_rate || parseFloat(form.purchase_rate) <= 0) newErrors.purchase_rate = "Purchase Rate is required";
-    if (!form.weighbridge_weight || parseFloat(form.weighbridge_weight) <= 0) newErrors.weighbridge_weight = "Weighbridge Weight is required";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (!partyId) {
+      Alert.alert('Error', 'Select a purchaser');
       return;
     }
-    
-    setErrors({});
-
+    const payloadItems = lines
+      .filter((l) => l.item_id && parseFloat(l.quantity) > 0)
+      .map((l) => ({
+        item_id: l.item_id,
+        quantity: parseFloat(l.quantity),
+        count: itemMap[l.item_id]?.unit_type === 'KG' && l.count ? parseInt(l.count, 10) : null,
+        rate: parseFloat(l.rate) || 0,
+      }));
+    if (!payloadItems.length) {
+      Alert.alert('Error', 'Add at least one item line');
+      return;
+    }
     mutation.mutate({
-      ...form,
-      date: form.date || new Date().toISOString().split('T')[0],
-      party_id: form.supplier_id,
-      total_boxes: parseInt(form.total_boxes) || 0,
-      birds_per_box: parseInt(form.birds_per_box) || 0,
-      actual_birds: parseInt(form.actual_birds) || 0,
-      weighbridge_weight: parseFloat(form.weighbridge_weight) || 0,
-      net_weight: parseFloat(form.net_weight) || 0,
-      purchase_rate: parseFloat(form.purchase_rate) || 0,
-      purchase_amount: parseFloat(form.total_amount) || 0,
-      cash_payment: parseFloat(form.cash_payment) || 0,
-      upi_payment: parseFloat(form.upi_payment) || 0
+      party_id: partyId,
+      date,
+      cash_payment: parseFloat(cash) || 0,
+      upi_payment: parseFloat(upi) || 0,
+      driver_name: driverName || null,
+      vehicle_number: vehicleNumber || null,
+      items: payloadItems,
     });
   };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="px-4 py-3 bg-white border-b border-gray-100 flex-row items-center justify-between shadow-sm">
+      <View className="px-4 py-3 bg-white border-b border-gray-100 flex-row items-center justify-between">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
             <ArrowLeft size={24} color="#111827" />
           </TouchableOpacity>
-          <Text className="text-lg font-bold text-gray-900">{editData ? (isEditing ? 'Edit Purchase' : 'Purchase Details') : 'New Purchase'}</Text>
+          <Text className="text-lg font-bold text-gray-900">{editData ? 'Edit Purchase' : 'New Purchase'}</Text>
         </View>
-        {editData && !isEditing && (
-          <TouchableOpacity onPress={() => setIsEditing(true)} className="bg-gray-100 px-3 py-1.5 rounded-full flex-row items-center">
-            <Pencil color="#374151" size={14} className="mr-1" />
-            <Text className="text-sm font-semibold text-gray-700">Edit</Text>
+        {editData && (
+          <TouchableOpacity
+            onPress={() =>
+              Alert.alert('Delete?', 'This reverts stock and balance.', [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: () => deleteMutation.mutate() },
+              ])
+            }
+          >
+            <Trash2 color="#dc2626" size={20} />
           </TouchableOpacity>
         )}
       </View>
 
-      <KeyboardAwareScrollView 
+      <KeyboardAwareScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-        enableOnAndroid={true}
-        extraScrollHeight={120}
+        contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+        enableOnAndroid
         keyboardShouldPersistTaps="handled"
       >
-        <View pointerEvents={isEditing ? 'auto' : 'none'} className="flex-1">
-        {/* Supplier & Logistics */}
-        <View className="mb-5">
-          <View className="flex-row items-center mb-3">
-            <Truck color="#006948" size={20} className="mr-2" />
-            <Text className="text-sm font-semibold text-[#006948]">Purchaser & Logistics</Text>
-          </View>
-          
-          <View className="space-y-3">
-            <View className="flex-col md:flex-row md:justify-between">
-              <View className="md:w-[48%] mb-3 md:mb-0">
-                <Text className="text-xs font-medium text-gray-700 mb-1">Date</Text>
-                {Platform.OS === 'web' ? (
-                  <input 
-                    type="date"
-                    value={form.date}
-                    onChange={(e: any) => setForm({...form, date: e.target.value})}
-                    style={{ padding: 10, width: '100%', height: 50, border: '1px solid #d1d5db', borderRadius: 6, backgroundColor: 'white' }}
-                  />
-                ) : (
-                  <>
-                    <TouchableOpacity 
-                      onPress={() => setShowDatePicker(true)}
-                      className="w-full px-3 bg-white border border-gray-300 rounded-md h-[50px] justify-center"
-                    >
-                      <Text className="text-sm">{formatDate(form.date)}</Text>
-                    </TouchableOpacity>
-                    {showDatePicker && (
-                      <DateTimePicker
-                        value={new Date(form.date)}
-                        mode="date"
-                        display="default"
-                        onValueChange={(event: any, selectedDate: any) => {
-                          setShowDatePicker(false);
-                          if (selectedDate) {
-                            setForm({...form, date: selectedDate.toISOString().split('T')[0]});
-                          }
-                        }}
-                        onDismiss={() => setShowDatePicker(false)}
-                      />
-                    )}
-                  </>
-                )}
-              </View>
-              <View className="md:w-[48%]">
-                <Text className="text-xs font-medium text-gray-700 mb-1">Purchaser</Text>
-                <View className="w-full bg-white border border-gray-300 rounded-md justify-center min-h-[50px]">
-                  <Picker
-                    selectedValue={form.supplier_id}
-                    onValueChange={(itemValue) => setForm({...form, supplier_id: itemValue})}
-                    mode="dropdown"
-                    style={{ width: '100%' }}
-                  >
-                    <Picker.Item label="Select a Purchaser..." value="" color="#9ca3af" />
-                    {parties?.filter((p: any) => p.type === 'PURCHASER').map((party: any) => (
-                      <Picker.Item key={party.id} label={party.name} value={party.id} />
-                    ))}
-                  </Picker>
-                </View>
-                {errors.supplier_id && <Text className="text-red-500 text-xs mt-1">{errors.supplier_id}</Text>}
-              </View>
-            </View>
-            <View className="flex-col md:flex-row md:justify-between">
-              <View className="md:w-[48%] mb-3 md:mb-0">
-                <Text className="text-xs font-medium text-gray-700 mb-1">Driver Name</Text>
-                <TextInput 
-                  placeholder="Ramu"
-                  value={form.driver_name}
-                  onChangeText={(v) => { setForm({...form, driver_name: v}); setErrors({...errors, driver_name: null}); }}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-md text-sm"
-                />
-                {errors.driver_name && <Text className="text-red-500 text-xs mt-1">{errors.driver_name}</Text>}
-              </View>
-              <View className="md:w-[48%]">
-                <Text className="text-xs font-medium text-gray-700 mb-1">Vehicle Number</Text>
-                <TextInput 
-                  placeholder="MH-12-AB-1234"
-                  value={form.vehicle_number}
-                  onChangeText={handleVehicleNumberChange}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-md text-sm"
-                />
-                {errors.vehicle_number && <Text className="text-red-500 text-xs mt-1">{errors.vehicle_number}</Text>}
-              </View>
-            </View>
-          </View>
+        <Text className="text-xs font-medium text-gray-700 mb-1">Date</Text>
+        <TouchableOpacity
+          onPress={() => setShowDatePicker(true)}
+          className="bg-white border border-gray-300 rounded-md px-3 py-2.5 mb-3"
+        >
+          <Text>{date}</Text>
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            value={new Date(date)}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={(_, d) => {
+              setShowDatePicker(Platform.OS === 'ios');
+              if (d) setDate(d.toISOString().split('T')[0]);
+            }}
+          />
+        )}
+
+        <Text className="text-xs font-medium text-gray-700 mb-1">Purchaser *</Text>
+        <View className="bg-white border border-gray-300 rounded-md mb-4">
+          <Picker selectedValue={partyId} onValueChange={setPartyId}>
+            <Picker.Item label="Select purchaser" value="" />
+            {(parties || []).map((p: any) => (
+              <Picker.Item key={p.id} label={p.name} value={p.id} />
+            ))}
+          </Picker>
         </View>
 
-        {/* Quantity Details */}
-        <View className="mb-5">
-          <View className="flex-row items-center mb-3">
-            <Box color="#006948" size={20} className="mr-2" />
-            <Text className="text-sm font-semibold text-[#006948]">Quantity Details</Text>
-          </View>
-          
-          <View className="flex-row justify-between mb-3">
-            <View className="w-[48%]">
-              <Text className="text-xs font-medium text-gray-700 mb-1">Total Boxes</Text>
-                <TextInput 
-                  placeholder="100"
-                  keyboardType="numeric"
-                  value={form.total_boxes}
-                  onChangeText={(v) => { setForm({...form, total_boxes: v}); setErrors({...errors, total_boxes: null}); }}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-md text-sm"
-                />
-                {errors.total_boxes && <Text className="text-red-500 text-xs mt-1">{errors.total_boxes}</Text>}
-              </View>
-              <View className="w-[48%]">
-                <Text className="text-xs font-medium text-gray-700 mb-1">Birds per Box</Text>
-                <TextInput 
-                  placeholder="15"
-                  keyboardType="numeric"
-                  value={form.birds_per_box}
-                  onChangeText={(v) => { setForm({...form, birds_per_box: v}); setErrors({...errors, birds_per_box: null}); }}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-md text-sm"
-                />
-                {errors.birds_per_box && <Text className="text-red-500 text-xs mt-1">{errors.birds_per_box}</Text>}
-              </View>
-          </View>
+        <View className="flex-row items-center mb-2">
+          <Truck color="#006269" size={18} />
+          <Text className="text-sm font-semibold text-[#006269] ml-2">Logistics (optional)</Text>
+        </View>
+        <TextInput
+          placeholder="Driver name"
+          value={driverName}
+          onChangeText={setDriverName}
+          className="bg-white border border-gray-300 rounded-md px-3 py-2.5 mb-2"
+        />
+        <TextInput
+          placeholder="Vehicle number"
+          value={vehicleNumber}
+          onChangeText={setVehicleNumber}
+          autoCapitalize="characters"
+          className="bg-white border border-gray-300 rounded-md px-3 py-2.5 mb-4"
+        />
 
-          <View className="mb-3">
-            <View className="flex-row items-center justify-between mb-1">
-              <Text className="text-xs font-medium text-gray-700">Total Birds Count</Text>
-              {!isEditingBirds && (
-                <TouchableOpacity onPress={() => setIsEditingBirds(true)} className="flex-row items-center">
-                  <Pencil color="#006948" size={12} className="mr-1" />
-                  <Text className="text-xs font-medium text-[#006948]">Edit</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-            <TextInput 
-              placeholder="0" 
-              keyboardType="numeric" 
-              value={form.actual_birds}
-              onChangeText={(v) => setForm({...form, actual_birds: v})}
-              editable={isEditingBirds}
-              className={`w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm font-bold ${!isEditingBirds ? 'bg-gray-100 text-gray-500' : 'bg-white text-gray-900'}`}
-            />
-            {isEditingBirds && (
-              <TouchableOpacity onPress={() => setIsEditingBirds(false)} className="mt-2 self-end">
-                <Text className="text-xs font-medium text-gray-500">Cancel Edit (Auto Calculate)</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+        <View className="flex-row justify-between items-center mb-2">
+          <Text className="text-sm font-semibold text-[#006269]">Items</Text>
+          <TouchableOpacity onPress={() => setLines((p) => [...p, emptyLine()])} className="flex-row items-center">
+            <Plus color="#006269" size={16} />
+            <Text className="text-[#006269] text-sm ml-1">Add line</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Weight & Rates */}
-        <View className="mb-5">
-          <View className="flex-row items-center mb-3">
-            <Scale color="#006948" size={20} className="mr-2" />
-            <Text className="text-sm font-semibold text-[#006948]">Weight & Rates</Text>
-          </View>
-          
-          <View className="flex-row justify-between mb-3">
-            <View className="w-[48%]">
-              <Text className="text-xs font-medium text-gray-700 mb-1">Purchase Rate (₹/kg)</Text>
-                <TextInput 
-                  placeholder="120"
-                  keyboardType="numeric"
-                  value={form.purchase_rate}
-                  onChangeText={(v) => { setForm({...form, purchase_rate: v}); setErrors({...errors, purchase_rate: null}); }}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-md text-sm"
-                />
-                {errors.purchase_rate && <Text className="text-red-500 text-xs mt-1">{errors.purchase_rate}</Text>}
-              </View>
-            <View className="w-[48%]">
-              <Text className="text-xs font-medium text-gray-700 mb-1">Weighbridge Weight (kg)</Text>
-                <TextInput 
-                  placeholder="1500.5"
-                  keyboardType="numeric"
-                  value={form.weighbridge_weight}
-                  onChangeText={(v) => { setForm({...form, weighbridge_weight: v}); setErrors({...errors, weighbridge_weight: null}); }}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-md text-sm"
-                />
-                {errors.weighbridge_weight && <Text className="text-red-500 text-xs mt-1">{errors.weighbridge_weight}</Text>}
-              </View>
-          </View>
-
-          <View className="mb-3">
-            <View className="flex-row justify-between items-center mb-1">
-              <Text className="text-xs font-medium text-gray-700">Net Weight (kg)</Text>
-              {!isEditingNetWeight && (
-                <TouchableOpacity onPress={() => setIsEditingNetWeight(true)} className="flex-row items-center">
-                  <Pencil color="#006948" size={12} className="mr-1" />
-                  <Text className="text-xs font-medium text-[#006948]">Edit</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-            <TextInput 
-              placeholder="0.00" 
-              keyboardType="numeric" 
-              value={form.net_weight}
-              onChangeText={(v) => setForm({...form, net_weight: v})}
-              editable={isEditingNetWeight}
-              className={`w-full px-3 py-2.5 border border-gray-300 rounded-md text-sm font-bold ${!isEditingNetWeight ? 'bg-gray-100 text-gray-500' : 'bg-white text-gray-900'}`}
-            />
-            {!isEditingNetWeight ? (
-              <View className="flex-row items-center mt-1">
-                <Text className="text-[10px] text-gray-500">Auto-calculated: Weighbridge - (Total Birds × </Text>
-                {isEditingGrams ? (
-                  <TextInput
-                    value={form.empty_bird_weight_g}
-                    onChangeText={(v) => setForm({...form, empty_bird_weight_g: v})}
-                    onBlur={() => setIsEditingGrams(false)}
-                    keyboardType="numeric"
-                    autoFocus
-                    className="p-0 text-[10px] font-bold text-gray-700 border-b border-[#006948] w-6 text-center"
-                  />
-                ) : (
-                  <TouchableOpacity onPress={() => setIsEditingGrams(true)} className="flex-row items-center">
-                    <Text className="text-[10px] font-bold text-[#006948] mr-1">{form.empty_bird_weight_g}g</Text>
-                    <Edit2 color="#006948" size={10} />
+        {lines.map((line, idx) => {
+          const item = itemMap[line.item_id];
+          const isKg = item?.unit_type === 'KG';
+          return (
+            <View key={idx} className="bg-white border border-gray-200 rounded-xl p-3 mb-3">
+              <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-xs font-semibold text-gray-500">Line {idx + 1}</Text>
+                {lines.length > 1 && (
+                  <TouchableOpacity onPress={() => setLines((p) => p.filter((_, i) => i !== idx))}>
+                    <Trash2 color="#dc2626" size={16} />
                   </TouchableOpacity>
                 )}
-                <Text className="text-[10px] text-gray-500">)</Text>
               </View>
-            ) : (
-              <TouchableOpacity onPress={() => setIsEditingNetWeight(false)} className="mt-2 self-end">
-                <Text className="text-xs font-medium text-gray-500">Cancel Edit (Auto Calculate)</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
+              <View className="border border-gray-300 rounded-md mb-2">
+                <Picker selectedValue={line.item_id} onValueChange={(v) => updateLine(idx, { item_id: v })}>
+                  <Picker.Item label="Select item" value="" />
+                  {(items || []).map((it: any) => (
+                    <Picker.Item key={it.id} label={`${it.name_en} (${it.unit_type})`} value={it.id} />
+                  ))}
+                </Picker>
+              </View>
+              <View className="flex-row gap-2">
+                <View className="flex-1">
+                  <Text className="text-[10px] text-gray-500 mb-1">{isKg ? 'Quantity (Kg)' : 'Quantity (Unit)'}</Text>
+                  <TextInput
+                    keyboardType="decimal-pad"
+                    value={line.quantity}
+                    onChangeText={(v) => updateLine(idx, { quantity: v })}
+                    className="border border-gray-300 rounded-md px-2 py-2"
+                  />
+                </View>
+                {isKg && (
+                  <View className="flex-1">
+                    <Text className="text-[10px] text-gray-500 mb-1">Total Count</Text>
+                    <TextInput
+                      keyboardType="number-pad"
+                      value={line.count}
+                      onChangeText={(v) => updateLine(idx, { count: v })}
+                      className="border border-gray-300 rounded-md px-2 py-2"
+                    />
+                  </View>
+                )}
+                <View className="flex-1">
+                  <Text className="text-[10px] text-gray-500 mb-1">Rate</Text>
+                  <TextInput
+                    keyboardType="decimal-pad"
+                    value={line.rate}
+                    onChangeText={(v) => updateLine(idx, { rate: v })}
+                    className="border border-gray-300 rounded-md px-2 py-2"
+                  />
+                </View>
+              </View>
+              <Text className="text-right text-sm font-semibold text-gray-800 mt-2">
+                ₹{lineTotals[idx].toLocaleString()}
+              </Text>
+            </View>
+          );
+        })}
 
-        {/* Total Purchase Amount */}
-        <View className="mb-5">
-          <Text className="text-xs font-medium text-gray-700 mb-1">Total Purchase Amount (Net Weight × Purchase Rate)</Text>
-          <TextInput 
-            placeholder="0.00" 
-            value={form.total_amount}
-            editable={false}
-            className="w-full px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-md text-[#006948] font-bold text-lg" 
+        <View className="bg-white border border-gray-200 rounded-xl p-4 mb-3">
+          <Text className="text-sm font-semibold text-[#006269] mb-3">Payment</Text>
+          <Text className="text-xs text-gray-500 mb-1">Cash Paid</Text>
+          <TextInput
+            keyboardType="decimal-pad"
+            value={cash}
+            onChangeText={setCash}
+            className="border border-gray-300 rounded-md px-3 py-2 mb-2"
           />
-        </View>
-
-        {/* Payment */}
-        <View className="mb-10">
-          <View className="flex-row items-center mb-3">
-            <Banknote color="#006948" size={20} className="mr-2" />
-            <Text className="text-sm font-semibold text-[#006948]">Payment</Text>
+          <Text className="text-xs text-gray-500 mb-1">UPI Paid</Text>
+          <TextInput
+            keyboardType="decimal-pad"
+            value={upi}
+            onChangeText={setUpi}
+            className="border border-gray-300 rounded-md px-3 py-2 mb-3"
+          />
+          <View className="flex-row justify-between mb-1">
+            <Text className="text-gray-600">Total Amount</Text>
+            <Text className="font-bold">₹{totalAmount.toLocaleString()}</Text>
           </View>
-          
-          <View className="space-y-3">
-            <View className="flex-row justify-between">
-              <View className="w-[48%]">
-                <Text className="text-xs font-medium text-gray-700 mb-1">Cash Payment (₹)</Text>
-                <TextInput 
-                  placeholder="0.00" 
-                  keyboardType="numeric" 
-                  value={form.cash_payment}
-                  onChangeText={(v) => setForm({...form, cash_payment: v})}
-                  className="w-full px-3 py-2.5 border border-gray-300 bg-white rounded-md text-sm font-bold" 
-                />
-              </View>
-              <View className="w-[48%]">
-                <Text className="text-xs font-medium text-gray-700 mb-1">UPI Payment (₹)</Text>
-                <TextInput 
-                  placeholder="0.00" 
-                  keyboardType="numeric" 
-                  value={form.upi_payment}
-                  onChangeText={(v) => setForm({...form, upi_payment: v})}
-                  className="w-full px-3 py-2.5 border border-gray-300 bg-white rounded-md text-sm font-bold" 
-                />
-              </View>
-            </View>
-            <View className="flex-row justify-between items-center bg-gray-100 p-3 rounded-md mt-2">
-              <View>
-                <Text className="text-xs text-gray-500 font-medium">Total Paid</Text>
-                <Text className="text-sm font-bold text-[#006948]">₹ {((parseFloat(form.cash_payment) || 0) + (parseFloat(form.upi_payment) || 0)).toFixed(2)}</Text>
-              </View>
-              <View className="items-end">
-                <Text className="text-xs text-gray-500 font-medium">Balance Amount</Text>
-                <Text className="text-sm font-bold text-red-500">
-                  ₹ {((parseFloat(form.total_amount) || 0) - ((parseFloat(form.cash_payment) || 0) + (parseFloat(form.upi_payment) || 0))).toFixed(2)}
-                </Text>
-              </View>
-            </View>
+          <View className="flex-row justify-between mb-1">
+            <Text className="text-gray-600">Total Paid</Text>
+            <Text className="font-bold">₹{totalPaid.toLocaleString()}</Text>
           </View>
-        </View>
+          <View className="flex-row justify-between">
+            <Text className="text-gray-600">Balance</Text>
+            <Text className="font-bold text-[#006269]">₹{balance.toLocaleString()}</Text>
+          </View>
         </View>
       </KeyboardAwareScrollView>
 
-      {/* Bottom Actions */}
-      {isEditing && (
-        <View className="absolute bottom-0 w-full bg-white border-t border-gray-200 p-4 flex-row justify-between">
-          {editData ? (
-            <TouchableOpacity 
-              onPress={handleDelete}
-              disabled={deleteMutation.isPending || mutation.isPending}
-              className="w-[15%] py-3 bg-red-100 border border-red-200 rounded-md items-center justify-center mr-2"
-            >
-              <Trash2 color="#dc2626" size={20} />
-            </TouchableOpacity>
-          ) : null}
-          <TouchableOpacity 
-            onPress={() => {
-              if (editData) setIsEditing(false);
-              else navigation.goBack();
-            }}
-            className={`${editData ? 'w-[25%]' : 'w-[30%]'} py-3 bg-white border border-gray-300 rounded-md items-center justify-center mr-2`}
-          >
-            <Text className="text-gray-700 font-semibold text-sm">Cancel</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            onPress={handleSave}
-            disabled={mutation.isPending || (editData && deleteMutation.isPending)}
-            className={`${editData ? 'w-[55%]' : 'w-[68%]'} py-3 bg-[#006948] rounded-md flex-row items-center justify-center`}
-          >
-            <Save color="white" size={16} className="mr-2" />
-            <Text className="text-white font-semibold text-sm">{mutation.isPending ? 'Saving...' : (editData ? 'Update Purchase' : 'Save Purchase')}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      <View className="absolute bottom-0 w-full bg-white border-t border-gray-200 p-4">
+        <TouchableOpacity
+          onPress={handleSave}
+          disabled={mutation.isPending}
+          className="bg-[#006269] py-3 rounded-md flex-row items-center justify-center"
+        >
+          <Save color="white" size={16} />
+          <Text className="text-white font-semibold ml-2">
+            {mutation.isPending ? 'Saving...' : 'Save Purchase'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }

@@ -2,7 +2,11 @@ from enum import Enum
 
 class PartyType(str, Enum):
     SUPPLIER = "SUPPLIER"
-    PURCHASER = "PURCHASER"
+    CUSTOMER = "CUSTOMER"
+
+class UnitType(str, Enum):
+    KG = "KG"
+    UNIT = "UNIT"
 
 class TransactionType(str, Enum):
     RECEIVED = "received"

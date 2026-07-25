@@ -42,3 +42,17 @@ Below is the list of models tracked in the BROILER 360 system:
 - Simple log of standalone money collection or payout that adjusts a Party's balance (not tied directly to a single bill during creation).
 - Fields: `id`, `party_id`, `date`, `cash_amount`, `upi_amount`, `total_amount`, `type` (Enum: RECEIVED, PAID).
 - Logic: Adjusts the `current_balance` on the Party immediately.
+
+
+### [2026-07-24 14:58:50] - New Master-Detail Models
+1. **Item:** Master catalog tracking `name_ta`, `name_en`, `available_stock`, `used_stock`, `minimum_stock`.
+2. **Purchase:** Header containing `party_id`, `total_amount`, `cash_payment`, `upi_payment`, `balance_amount`.
+3. **PurchaseItem:** Detail containing `item_id`, `quantity`, `count`, `rate`, `amount`.
+4. **Sale:** Header analogous to Purchase.
+5. **SaleItem:** Detail analogous to PurchaseItem.
+
+### [2026-07-24 16:21:07] - Party + Inventory Hardening (v2.0 workflow)
+1. **Party:** Added `company_name` (optional), `is_active` (default true). Mobile required at API boundary.
+2. **InventoryService:** Oversell rejected with 422; purchase/sale reverse helpers; `get_low_stock_alerts`.
+3. **Purchase/Sale APIs:** Server recomputes line `amount` and header totals; PUT replaces bill after reverting stock/balance; responses include `party_name` and optional `low_stock_alerts`.
+4. **Reports:** Aggregated endpoints under `/api/reports/{purchases,sales,inventory,expenses,outstanding}`.

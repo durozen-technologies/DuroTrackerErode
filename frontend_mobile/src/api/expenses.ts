@@ -2,7 +2,8 @@ import client from './client';
 
 export interface ExpenseCategory {
   id: string;
-  name: string;
+  name_ta: string;
+  name_en: string;
   sort_order: number;
   is_active: boolean;
 }
@@ -23,16 +24,25 @@ export async function fetchExpenseCategories(activeOnly: boolean = true): Promis
   return response.data;
 }
 
-export async function createExpenseCategory(name: string, sort_order: number = 0, is_active: boolean = true): Promise<ExpenseCategory> {
+export async function createExpenseCategory(
+  name_en: string,
+  name_ta: string = '',
+  sort_order: number = 0,
+  is_active: boolean = true
+): Promise<ExpenseCategory> {
   const response = await client.post('/expenses/categories', {
-    name,
+    name_en,
+    name_ta: name_ta || name_en,
     sort_order,
-    is_active
+    is_active,
   });
   return response.data;
 }
 
-export async function updateExpenseCategory(id: string, updates: Partial<ExpenseCategory>): Promise<ExpenseCategory> {
+export async function updateExpenseCategory(
+  id: string,
+  updates: Partial<ExpenseCategory>
+): Promise<ExpenseCategory> {
   const response = await client.put(`/expenses/categories/${id}`, updates);
   return response.data;
 }
@@ -54,7 +64,7 @@ export async function createExpenseEntry(
     expense_name,
     cash_amount,
     upi_amount,
-    note
+    note,
   });
   return response.data;
 }
@@ -72,7 +82,7 @@ export async function updateExpenseEntry(
     expense_name,
     cash_amount,
     upi_amount,
-    note
+    note,
   });
   return response.data;
 }

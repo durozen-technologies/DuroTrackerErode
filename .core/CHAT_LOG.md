@@ -349,3 +349,81 @@ Agent: I searched the frontend UI and successfully replaced all instances of "Cu
 - Discovered that the root repo was trying to add `.git` subfolders from `backend/` and `frontend_mobile/` which caused Git to fail adding the files.
 - Deleted the nested `.git` folders so they could be properly tracked by the root repository.
 - Ran `git add .`, `git commit -m "Push all code"`, and `git push -u origin main`.
+
+### [2026-07-24 13:17:48]
+**User:** https://github.com/addyosmani/agent-skills
+https://ponytail.dev/#install
+https://github.com/pbakaus/impeccable
+
+install this in the project codebase for the agent
+**Agent:** Ran terminal commands to clone the repos into /tmp/repos and copied their skills/ and AGENTS.md files into the .agents folder of the workspace.
+
+### [2026-07-24 13:34:33]
+**User:** Requested backend optimization, uuid7, test db, and test configuration without Redis.
+**Agent:** Executed the implementation plan. Replaced uuid4 fallbacks with genuine uuid7 logic. Setup test database isolation in conftest.py with httpx async clients. Restructured the codebase into schemas and services layers, and squashed pydantic deprecation warnings.
+
+### [2026-07-24 13:39:07]
+**User:** Make backend/main.py production grade.
+**Agent:** Wrote a production-grade Uvicorn runner that intelligently assigns workers based on system CPU cores and disables reload logic.
+
+
+### [2026-07-24 14:58:50] - Backend Rewrite Commands
+- `uv run python fix_db.py`: Dropped and recreated DB schema to match new V2 models.
+- `curl -s http://127.0.0.1:8001/api/dashboard/stats`: Tested dashboard endpoint and verified 200 OK.
+- `uv run pytest tests/`: Ran backend tests successfully.
+
+### [2026-07-24 15:30:00] - Frontend V2 Integration
+**Action Taken:** Updated backend models for logistics fields, recreated db schema, seeded Broiler item, and updated frontend React screens to use V2 API.
+
+### [2026-07-24 15:37:00] - UUID7 Integration
+**Action Taken:** Switched generic UUID types to Pydantic's strict UUID7 type across all route schemas.
+
+### [2026-07-24 15:45:00] - Reports and Dashboard Updates
+**Action Taken:** Implemented Dashboard date filtering and Frontend Reports module as per approved plan.
+
+### [2026-07-24 16:21:07] - Broiler Trading v2.0 Full Implementation
+**User:** Implement plan (1A + 2B) — parties/items/purchase/sale/reports/notifications.
+**Commands:** `uv run pytest tests/api/ -q` (3 passed); alembic migration `a1b2c3d4e5f6`.
+**Notes:** Backend hardened; mobile forms rewritten to multi-item; Reports + Notifications shipped.
+
+### [2026-07-24 16:28:32] - Cleanup
+**User:** Remove unwanted files; professional structure.
+**Deleted:** root `append_logs.py`, `Projectidea.md`; backend scratch scripts (`fix_db`, `seed*`, `test_500`, `test_db`, `test_post`, `alter_enum`, `check_enum`, `verify_party_db`).
+**Added:** root/backend README, `frontend_mobile/src/types.ts`, `src/api/resources.ts`, schema package exports.
+User: Explain what this problem is and help me fix it: Cannot find name 'Tag'. @[/home/sachinn-p/Codes/Durozen Projects/DuroTrackerErode/frontend_mobile/src/screens/DashboardScreen.tsx:L156]
+
+Agent: I found that the 'Tag' icon component was being used but not imported. I've added 'Tag' to the lucide-react-native imports in DashboardScreen.tsx.
+User: App navigattion bar should be in botton, but the phone apps navigation bar of the phone overlay, so it hides the application botton navigation bar, if the phone navigatetion bar overlay, move above the phone naigation bar with out any overlay and conflict.
+
+Agent: I found that the app was using createMaterialTopTabNavigator and was positioning it at the top. I have updated RootNavigator.tsx to place the tab bar at the bottom using tabBarPosition='bottom'. I also changed the padding to use paddingBottom: insets.bottom to ensure it respects the phone's system navigation bar and avoids any overlap.
+User: https://github.com/pbakaus/impeccable
+install in the project
+
+Agent: I successfully installed Impeccable in the project using bunx. The design hook and agent skills were installed in the workspace.
+User: /impeccable polish the navigation bar of the app
+
+Agent: I read the Impeccable polish references and applied several UI improvements to the navigation bar. I removed the generic drop-shadow, replaced it with a crisp top border, softened the inactive tab color, adjusted the typography scale to be cleaner, and added proper vertical spacing for visual rhythm.
+User: /impeccable fix it # Impeccable findings
+
+Agent: I identified that the 'transition: padding' warning on web was caused by 'react-native-safe-area-context' which injects inline styles to animate safe area padding. I fixed this by adding a CSS override in global.css to restrict transition-property to safe properties (like transform and opacity) and ignore layout properties like padding.
+User: /impeccable colorize bring new color to the application.
+
+Agent: I created a colorize implementation plan centered around the brand's primary green (#006948). After approval, I updated the Tailwind config with semantic tokens (canvas, surface, brand, content, border, status) and replaced the generic color usage on DashboardScreen and RootNavigator to create a more sophisticated, unified interface.
+User: I like this color implement it, and similar color color overall the colors
+
+Agent: I shifted the entire semantic palette across the app to complement your new dark teal brand color, replacing all instances of the old green and ensuring the background canvas and secondary text now elegantly harmonize with teal.
+User: /impeccable  use different colors for the Quick navigation
+
+Agent: I updated the Quick Navigation buttons in DashboardScreen.tsx to use a distinct yet cohesive set of sophisticated colors (indigo, teal, amber, rose, slate), moving away from the uniform brand color while avoiding the loud pastel default colors of the previous design.
+User: Fix the app navigation bar with without breaking text.
+
+Agent: I fixed the bottom navigation tab text wrapping issue by supplying a custom label that forces it to a single line and adjusts the font size dynamically, and removed the horizontal padding to maximize available space.
+User: /impeccable Fix the app navigation bar with without breaking text. With colors
+
+Agent: I applied the same distinct, sophisticated color mapping from the Quick Navigation to the bottom app navigation bar. Now, when a tab is focused, both its icon and text will light up in its specific color (e.g. Purchases is indigo, Expenses is rose) rather than a uniform teal.
+User: Also fix the top bar of the app of the application without overlay. /impeccable
+
+Agent: I wrapped the MainTabNavigator inside a top SafeAreaView with a white background. This globally pushes all tab screens cleanly below the system status bar, eliminating the overlap while maintaining the unified white header appearance.
+User: /impeccable Download the React DevTools for a better development experience... Uncaught TransformError: SyntaxError: Unexpected token
+
+Agent: I identified and fixed a SyntaxError in src/types.ts caused by an erroneous Python-style docstring comment ('"""Shared TypeScript contracts..."""') at the very top of the file, replacing it with a clean TypeScript multi-line comment ('/** ... */'). This resolves the compilation failure.

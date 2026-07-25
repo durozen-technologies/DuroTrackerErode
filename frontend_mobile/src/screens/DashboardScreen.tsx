@@ -1,192 +1,270 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { TrendingUp, ShoppingCart, Receipt, BarChart2, Users, Truck, ChevronRight } from 'lucide-react-native';
+import {
+  TrendingUp,
+  ShoppingCart,
+  Receipt,
+  BarChart2,
+  Users,
+  Truck,
+  ChevronRight,
+  FileText,
+  Package,
+  Bell,
+  Tag,
+} from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
-import client from '../api/client';
+import { fetchDashboardStats } from '../api/resources';
+
+function toYMD(d: Date) {
+  return d.toISOString().split('T')[0];
+}
+
+function rangeFor(chip: 'today' | 'yesterday' | 'week') {
+  const today = new Date();
+  if (chip === 'today') return { from: toYMD(today), to: toYMD(today) };
+  if (chip === 'yesterday') {
+    const y = new Date(today);
+    y.setDate(y.getDate() - 1);
+    return { from: toYMD(y), to: toYMD(y) };
+  }
+  const from = new Date(today);
+  from.setDate(from.getDate() - 6);
+  return { from: toYMD(from), to: toYMD(today) };
+}
 
 export default function DashboardScreen() {
-  const navigation = useNavigation();
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['dashboardStats'],
-    queryFn: async () => {
-      const response = await client.get('/dashboard/stats');
-      return response.data;
-    }
+  const navigation = useNavigation<any>();
+  const [chip, setChip] = useState<'today' | 'yesterday' | 'week'>('today');
+  const range = useMemo(() => rangeFor(chip), [chip]);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['dashboardStats', range.from, range.to],
+    queryFn: () => fetchDashboardStats(range.from, range.to),
   });
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
-        <ActivityIndicator size="large" color="#006948" />
-      </SafeAreaView>
+      <View className="flex-1 bg-canvas justify-center items-center">
+        <ActivityIndicator size="large" color="#006269" />
+      </View>
     );
   }
 
-  // Fallback defaults if data is empty
   const stats = data || {
     total_sales: 0,
     total_purchases: 0,
     total_expenses: 0,
     net_profit: 0,
-    birds_sold: 0,
-    birds_purchased: 0,
-    avg_weight_sold: 0
+    customer_outstanding: 0,
+    supplier_outstanding: 0,
+    inventory: [],
+    low_stock_alerts: [],
   };
+
+  const Chip = ({ id, label }: { id: typeof chip; label: string }) => (
+    <TouchableOpacity
+      onPress={() => setChip(id)}
+      className={`px-5 py-2 rounded-md mr-2 ${chip === id ? 'bg-brand' : 'bg-surface border border-border'}`}
+    >
+      <Text className={`font-semibold ${chip === id ? 'text-surface' : 'text-content-secondary'}`}>{label}</Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Top App Bar */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
-        <Text className="text-xl font-bold text-[#006948]">Broiler 360</Text>
+    <View className="flex-1 bg-canvas">
+      <View className="flex-row items-center justify-between px-4 py-3 bg-surface border-b border-border">
+        <Text className="text-xl font-bold text-brand">Broiler 360</Text>
+        <View className="flex-row items-center">
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Notifications')}
+            className="flex-row items-center bg-brand-muted px-3 py-1.5 rounded-full mr-2"
+          >
+            <Bell size={18} color="#006269" />
+            {(stats.low_stock_alerts?.length || 0) > 0 && (
+              <View className="ml-1 bg-status-error rounded-full px-1.5">
+                <Text className="text-surface text-[10px] font-bold">{stats.low_stock_alerts.length}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Reports')}
+            className="flex-row items-center bg-brand-muted px-3 py-1.5 rounded-full"
+          >
+            <FileText size={18} color="#006269" />
+            <Text className="ml-1 text-brand font-semibold text-sm">Reports</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView className="flex-1 p-4">
-        {/* Date Filters */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6">
-          <TouchableOpacity className="px-5 py-2 bg-[#006948] rounded-md shadow-sm mr-2">
-            <Text className="text-white font-semibold">Today</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="px-5 py-2 bg-white border border-gray-300 rounded-md shadow-sm mr-2">
-            <Text className="text-gray-700 font-semibold">Yesterday</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="px-5 py-2 bg-white border border-gray-300 rounded-md shadow-sm mr-2">
-            <Text className="text-gray-700 font-semibold">This Week</Text>
-          </TouchableOpacity>
+          <Chip id="today" label="Today" />
+          <Chip id="yesterday" label="Yesterday" />
+          <Chip id="week" label="This Week" />
         </ScrollView>
 
-        {/* Grid Cards */}
         <View className="flex-row flex-wrap justify-between mb-6">
-          {/* Total Sales */}
-          <View className="w-[48%] bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3 h-28 justify-between">
+          <View className="w-[48%] bg-surface p-4 rounded-xl border border-border mb-3 h-28 justify-between">
             <View className="flex-row justify-between items-start">
-              <Text className="text-xs font-bold text-gray-600 tracking-wider">TOTAL SALES</Text>
-              <TrendingUp color="#006948" size={16} />
+              <Text className="text-xs font-bold text-content-secondary">TOTAL SALES</Text>
+              <TrendingUp color="#006269" size={16} />
             </View>
-            <View>
-              <Text className="text-lg font-bold text-gray-900">₹{stats.total_sales.toLocaleString()}</Text>
-            </View>
+            <Text className="text-lg font-bold text-content-primary">₹{(stats.total_sales || 0).toLocaleString()}</Text>
           </View>
-
-          {/* Total Purchase */}
-          <View className="w-[48%] bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3 h-28 justify-between">
+          <View className="w-[48%] bg-surface p-4 rounded-xl border border-border mb-3 h-28 justify-between">
             <View className="flex-row justify-between items-start">
-              <Text className="text-xs font-bold text-gray-600 tracking-wider">PURCHASES</Text>
-              <ShoppingCart color="#6b7280" size={16} />
+              <Text className="text-xs font-bold text-content-secondary">PURCHASES</Text>
+              <ShoppingCart color="#4B636B" size={16} />
             </View>
-            <View>
-              <Text className="text-lg font-bold text-gray-900">₹{stats.total_purchases.toLocaleString()}</Text>
-            </View>
+            <Text className="text-lg font-bold text-content-primary">₹{(stats.total_purchases || 0).toLocaleString()}</Text>
           </View>
-
-          {/* Total Expenses */}
-          <View className="w-[48%] bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-3 h-28 justify-between">
+          <View className="w-[48%] bg-surface p-4 rounded-xl border border-border mb-3 h-28 justify-between">
             <View className="flex-row justify-between items-start">
-              <Text className="text-xs font-bold text-gray-600 tracking-wider">EXPENSES</Text>
-              <Receipt color="#6b7280" size={16} />
+              <Text className="text-xs font-bold text-content-secondary">EXPENSES</Text>
+              <Receipt color="#4B636B" size={16} />
             </View>
-            <View>
-              <Text className="text-lg font-bold text-gray-900">₹{stats.total_expenses.toLocaleString()}</Text>
-            </View>
+            <Text className="text-lg font-bold text-content-primary">₹{(stats.total_expenses || 0).toLocaleString()}</Text>
           </View>
-
-          {/* Net Profit */}
-          <View className="w-[48%] bg-[#006948] p-4 rounded-xl shadow-sm mb-3 h-28 justify-between">
+          <View className="w-[48%] bg-brand p-4 rounded-xl mb-3 h-28 justify-between">
             <View className="flex-row justify-between items-start">
-              <Text className="text-xs font-bold text-white tracking-wider">NET PROFIT</Text>
+              <Text className="text-xs font-bold text-surface">NET PROFIT</Text>
               <BarChart2 color="white" size={16} />
             </View>
-            <View>
-              <Text className="text-lg font-bold text-white">₹{stats.net_profit.toLocaleString()}</Text>
-            </View>
+            <Text className="text-lg font-bold text-surface">₹{(stats.net_profit || 0).toLocaleString()}</Text>
           </View>
         </View>
 
-        {/* Quick Actions */}
         <View className="mb-6">
-          <Text className="text-lg font-bold text-gray-900 mb-3">Quick Actions</Text>
+          <Text className="text-lg font-bold text-content-primary mb-3">Quick Navigation</Text>
+          <View className="flex-row gap-3 mb-3">
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Purchases')}
+              className="flex-1 bg-surface p-4 rounded-xl border border-border items-center justify-center shadow-sm"
+            >
+              <View className="w-12 h-12 rounded-full bg-indigo-50 items-center justify-center mb-2">
+                <ShoppingCart color="#4F46E5" size={24} />
+              </View>
+              <Text className="text-sm font-bold text-content-primary">Purchases</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Sales')}
+              className="flex-1 bg-surface p-4 rounded-xl border border-border items-center justify-center shadow-sm"
+            >
+              <View className="w-12 h-12 rounded-full bg-brand-muted items-center justify-center mb-2">
+                <Tag color="#006269" size={24} />
+              </View>
+              <Text className="text-sm font-bold text-content-primary">Sales</Text>
+            </TouchableOpacity>
+          </View>
+          <View className="flex-row gap-3 mb-3">
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Parties')}
+              className="flex-1 bg-surface p-4 rounded-xl border border-border items-center justify-center shadow-sm"
+            >
+              <View className="w-12 h-12 rounded-full bg-amber-50 items-center justify-center mb-2">
+                <Users color="#D97706" size={24} />
+              </View>
+              <Text className="text-sm font-bold text-content-primary">Parties</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Expenses')}
+              className="flex-1 bg-surface p-4 rounded-xl border border-border items-center justify-center shadow-sm"
+            >
+              <View className="w-12 h-12 rounded-full bg-rose-50 items-center justify-center mb-2">
+                <Receipt color="#E11D48" size={24} />
+              </View>
+              <Text className="text-sm font-bold text-content-primary">Expenses</Text>
+            </TouchableOpacity>
+          </View>
           <View className="flex-row gap-3">
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('Expenses' as never)}
-              className="flex-1 bg-white p-3 rounded-xl border border-gray-200 flex-row items-center shadow-sm"
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Items')}
+              className="flex-1 bg-surface p-4 rounded-xl border border-border flex-row items-center shadow-sm"
             >
-              <View className="w-10 h-10 rounded-lg bg-green-100 items-center justify-center mr-3">
-                <Receipt color="#006948" size={20} />
+              <View className="w-10 h-10 rounded-lg bg-slate-100 items-center justify-center mr-3">
+                <Package color="#475569" size={20} />
               </View>
               <View className="flex-1">
-                <Text className="text-sm font-bold text-gray-900">Expenses</Text>
-                <Text className="text-xs text-gray-500">Record daily spend</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('ExpenseCategories' as never)}
-              className="flex-1 bg-white p-3 rounded-xl border border-gray-200 flex-row items-center shadow-sm"
-            >
-              <View className="w-10 h-10 rounded-lg bg-gray-100 items-center justify-center mr-3">
-                <BarChart2 color="#374151" size={20} />
-              </View>
-              <View className="flex-1">
-                <Text className="text-sm font-bold text-gray-900">Categories</Text>
-                <Text className="text-xs text-gray-500">Manage types</Text>
+                <Text className="text-sm font-bold text-content-primary">Items Master</Text>
+                <Text className="text-xs text-content-secondary">Manage stock</Text>
               </View>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Outstanding */}
         <View className="mb-6">
-          <Text className="text-lg font-bold text-gray-900 mb-3">Outstanding</Text>
-          <View className="bg-white p-3 rounded-xl border border-gray-200 flex-row items-center justify-between shadow-sm mb-2">
+          <Text className="text-lg font-bold text-content-primary mb-3">Outstanding</Text>
+          <View className="bg-surface p-3 rounded-xl border border-border flex-row items-center justify-between mb-2">
             <View className="flex-row items-center">
-              <View className="w-10 h-10 rounded-lg bg-orange-400 items-center justify-center mr-3">
-                <Users color="white" size={20} />
-              </View>
-              <View className="ml-3">
-                <Text className="text-xs font-semibold text-gray-600">Purchaser Dues</Text>
-                <Text className="text-base font-bold text-gray-900">₹1,24,000</Text>
-              </View>
-            </View>
-            <ChevronRight color="#9ca3af" size={20} />
-          </View>
-          
-          <View className="bg-white p-3 rounded-xl border border-gray-200 flex-row items-center justify-between shadow-sm">
-            <View className="flex-row items-center">
-              <View className="w-10 h-10 rounded-lg bg-gray-200 items-center justify-center mr-3">
-                <Truck color="#374151" size={20} />
+              <View className="w-10 h-10 rounded-lg bg-status-warningBg items-center justify-center mr-3">
+                <Users color="#D97706" size={20} />
               </View>
               <View>
-                <Text className="text-xs font-semibold text-gray-600">Supplier Payables</Text>
-                <Text className="text-base font-bold text-gray-900">₹85,500</Text>
+                <Text className="text-xs font-semibold text-content-secondary">Customer Dues</Text>
+                <Text className="text-base font-bold text-content-primary">
+                  ₹{(stats.customer_outstanding || 0).toLocaleString()}
+                </Text>
               </View>
             </View>
-            <ChevronRight color="#9ca3af" size={20} />
+            <ChevronRight color="#94A39D" size={20} />
+          </View>
+          <View className="bg-surface p-3 rounded-xl border border-border flex-row items-center justify-between">
+            <View className="flex-row items-center">
+              <View className="w-10 h-10 rounded-lg bg-status-infoBg items-center justify-center mr-3">
+                <Truck color="#0369A1" size={20} />
+              </View>
+              <View>
+                <Text className="text-xs font-semibold text-content-secondary">Purchaser Payables</Text>
+                <Text className="text-base font-bold text-content-primary">
+                  ₹{(stats.supplier_outstanding || 0).toLocaleString()}
+                </Text>
+              </View>
+            </View>
+            <ChevronRight color="#94A39D" size={20} />
           </View>
         </View>
 
-        {/* Flock Movement */}
-        <View className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-10">
-          <Text className="text-lg font-bold text-gray-900 mb-4">Flock Movement</Text>
-          <View className="flex-row justify-between items-end mb-4">
-            <View>
-              <Text className="text-xs font-semibold text-gray-600">Birds Sold</Text>
-              <Text className="text-xl font-bold text-gray-900">{stats.birds_sold}</Text>
-            </View>
-            <View className="items-end">
-              <Text className="text-xs font-semibold text-gray-600">Avg. Weight</Text>
-              <Text className="text-base font-bold text-[#006948]">{stats.avg_weight_sold.toFixed(2)} kg</Text>
-            </View>
-          </View>
-          <View className="h-px bg-gray-100 mb-4 w-full" />
-          <View className="flex-row justify-between items-end">
-            <View>
-              <Text className="text-xs font-semibold text-gray-600">Birds Purchased</Text>
-              <Text className="text-xl font-bold text-gray-900">{stats.birds_purchased}</Text>
-            </View>
-          </View>
-        </View>
+        <View className="bg-surface p-4 rounded-xl border border-border mb-10">
+          <Text className="text-lg font-bold text-content-primary mb-4">Inventory Overview</Text>
+          {stats.inventory?.length ? (
+            stats.inventory.map((item: any, index: number) => (
+              <View key={index} className="mb-4">
+                <Text className="text-sm font-bold text-content-primary">{item.item_name}</Text>
+                <View className="flex-row justify-between items-end mt-2">
+                  <View>
+                    <Text className="text-xs font-semibold text-content-secondary">Available</Text>
+                    <Text className="text-lg font-bold text-brand">{item.available_stock}</Text>
+                  </View>
+                  <View className="items-end">
+                    <Text className="text-xs font-semibold text-content-secondary">Used</Text>
+                    <Text className="text-lg font-bold text-content-primary">{item.used_stock}</Text>
+                  </View>
+                </View>
+                {index < stats.inventory.length - 1 && <View className="h-px bg-border my-3 w-full" />}
+              </View>
+            ))
+          ) : (
+            <Text className="text-content-secondary text-center py-4">No inventory items found</Text>
+          )}
 
+          {stats.low_stock_alerts?.length > 0 && (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Notifications')}
+              className="mt-4 p-3 bg-status-errorBg rounded-lg border border-[#FECACA]"
+            >
+              <Text className="text-status-error font-bold mb-2">Low Stock Alerts — tap for details</Text>
+              {stats.low_stock_alerts.map((alert: any, index: number) => (
+                <Text key={index} className="text-[#991B1B] text-xs">
+                  • {alert.item_name}: {alert.available} (min {alert.minimum})
+                </Text>
+              ))}
+            </TouchableOpacity>
+          )}
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, ShoppingCart, RefreshCcw } from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
-import client from '../api/client';
+import { fetchPurchases } from '../api/resources';
 
 export default function PurchasesScreen({ navigation }: any) {
   const { data: purchases, isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: ['purchases'],
-    queryFn: async () => {
-      const response = await client.get(`/purchases/`);
-      return response.data;
-    }
+    queryFn: fetchPurchases,
   });
 
   const onRefresh = React.useCallback(() => {
@@ -19,7 +16,7 @@ export default function PurchasesScreen({ navigation }: any) {
   }, [refetch]);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="px-4 py-3 bg-white border-b border-gray-200 flex-row items-center justify-between">
         <Text className="text-lg font-bold text-gray-900">Purchases</Text>
@@ -32,7 +29,7 @@ export default function PurchasesScreen({ navigation }: any) {
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={() => navigation.navigate('NewPurchase')}
-            className="bg-[#006948] flex-row items-center px-3 py-1.5 rounded-full"
+            className="bg-[#006269] flex-row items-center px-3 py-1.5 rounded-full"
           >
             <Plus color="white" size={16} className="mr-1" />
             <Text className="text-white text-sm font-semibold">New</Text>
@@ -43,11 +40,11 @@ export default function PurchasesScreen({ navigation }: any) {
       <ScrollView 
         className="flex-1 p-4"
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={['#006948']} />
+          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={['#006269']} />
         }
       >
         {isLoading ? (
-          <ActivityIndicator size="large" color="#006948" className="mt-10" />
+          <ActivityIndicator size="large" color="#006269" className="mt-10" />
         ) : isError ? (
           <Text className="text-center text-red-500 mt-10">Error loading purchases: {error?.message}</Text>
         ) : purchases?.length === 0 ? (
@@ -64,20 +61,28 @@ export default function PurchasesScreen({ navigation }: any) {
                   <ShoppingCart color="#374151" size={20} />
                 </View>
                 <View className="flex-1">
-                  <Text className="font-medium text-gray-900 text-base">{purchase.date}</Text>
-                  <Text className="text-xs text-gray-500 mt-1">Vehicle: {purchase.vehicle_number || 'N/A'} {purchase.driver_name ? `(${purchase.driver_name})` : ''}</Text>
-                  <Text className="text-xs text-gray-500 mt-0.5">Birds: {purchase.actual_birds} ({purchase.net_weight} kg)</Text>
+                  <Text className="font-medium text-gray-900 text-base">
+                    {purchase.party_name || 'Purchaser'} · {purchase.date}
+                  </Text>
+                  <Text className="text-xs text-gray-500 mt-1">
+                    {(purchase.items || [])
+                      .map((i: any) => `${i.item_name_en || 'Item'} (${i.quantity})`)
+                      .join(', ') || 'No items'}
+                  </Text>
+                  {purchase.vehicle_number ? (
+                    <Text className="text-xs text-gray-500 mt-0.5">Vehicle: {purchase.vehicle_number}</Text>
+                  ) : null}
                 </View>
               </View>
               <View className="items-end">
-                <Text className="text-base font-bold text-[#006948]">
-                  ₹{purchase.purchase_amount.toLocaleString()}
+                <Text className="text-base font-bold text-[#006269]">
+                  ₹{purchase.total_amount?.toLocaleString() || purchase.purchase_amount?.toLocaleString()}
                 </Text>
               </View>
             </TouchableOpacity>
           ))
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

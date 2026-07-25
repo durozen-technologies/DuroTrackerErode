@@ -1,4 +1,4 @@
-import axios from 'react-native-axios';
+import axios from 'axios';
 // We'll use standard axios instead since react-native-axios is old, actually standard axios works in RN.
 import standardAxios from 'axios';
 import { Platform } from 'react-native';

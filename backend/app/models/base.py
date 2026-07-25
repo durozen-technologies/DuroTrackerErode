@@ -1,12 +1,11 @@
 from datetime import datetime
 import uuid
+from uuid6 import uuid7 as generate_uuid7
 from sqlalchemy import DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 def uuid7() -> uuid.UUID:
-    # A simple fallback for UUID generation.
-    # In production, use a true uuid7 library if needed.
-    return uuid.uuid4()
+    return generate_uuid7()
 
 class BaseModelMixin:
     created_at: Mapped[datetime] = mapped_column(

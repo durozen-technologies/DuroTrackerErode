@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ChevronRight, Receipt, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -112,7 +112,7 @@ export default function ExpensesScreen() {
       updateExpenseMutation.mutate({
         id: editExpense.id,
         categoryId: selectedCategory.id,
-        name: selectedCategory.name,
+        name: selectedCategory.name_en,
         cash,
         upi,
         note: note.trim() || undefined
@@ -120,7 +120,7 @@ export default function ExpensesScreen() {
     } else {
       createExpenseMutation.mutate({
         categoryId: selectedCategory.id,
-        name: selectedCategory.name,
+        name: selectedCategory.name_en,
         cash,
         upi,
         note: note.trim() || undefined
@@ -134,7 +134,7 @@ export default function ExpensesScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50">
       {/* Top App Bar */}
       <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
         <View className="flex-row items-center">
@@ -155,7 +155,7 @@ export default function ExpensesScreen() {
         <Text className="text-sm font-bold text-gray-600 mb-3 uppercase tracking-wider">Record New Expense</Text>
         
         {isLoadingCategories ? (
-          <ActivityIndicator size="small" color="#006948" className="mb-6" />
+          <ActivityIndicator size="small" color="#006269" className="mb-6" />
         ) : (
           <View className="mb-6">
             {categories?.map((cat) => (
@@ -166,10 +166,10 @@ export default function ExpensesScreen() {
               >
                 <View className="flex-row items-center">
                   <View className="w-10 h-10 bg-green-50 rounded-full items-center justify-center mr-3">
-                    <Receipt color="#006948" size={20} />
+                    <Receipt color="#006269" size={20} />
                   </View>
                   <View>
-                    <Text className="text-base font-bold text-gray-900">{cat.name}</Text>
+                    <Text className="text-base font-bold text-gray-900">{cat.name_en}</Text>
                     <Text className="text-xs text-gray-500 mt-0.5">Tap to record</Text>
                   </View>
                 </View>
@@ -188,7 +188,7 @@ export default function ExpensesScreen() {
         <Text className="text-sm font-bold text-gray-600 mb-3 uppercase tracking-wider">Recent History</Text>
         
         {isLoadingHistory ? (
-          <ActivityIndicator size="small" color="#006948" />
+          <ActivityIndicator size="small" color="#006269" />
         ) : (
           <View className="mb-8">
             {history?.map((entry) => {
@@ -234,7 +234,7 @@ export default function ExpensesScreen() {
         >
           <View className="bg-white rounded-2xl p-6">
             <Text className="text-xl font-bold text-gray-900 mb-2 text-center">
-              {editExpense ? 'Edit' : 'Record'} {selectedCategory?.name}
+              {editExpense ? 'Edit' : 'Record'} {selectedCategory?.name_en}
             </Text>
             
             <View className="mb-4 mt-4">
@@ -271,7 +271,7 @@ export default function ExpensesScreen() {
 
             <View className="bg-green-50 p-4 rounded-lg mb-6 border border-green-200 flex-row justify-between items-center">
               <Text className="font-bold text-gray-700 uppercase text-xs">Total Expense</Text>
-              <Text className="text-xl font-bold text-[#006948]">
+              <Text className="text-xl font-bold text-[#006269]">
                 ₹{((parseFloat(cashAmount) || 0) + (parseFloat(upiAmount) || 0)).toLocaleString()}
               </Text>
             </View>
@@ -291,7 +291,7 @@ export default function ExpensesScreen() {
               </TouchableOpacity>
               <TouchableOpacity 
                 onPress={handleSaveExpense} 
-                className={`${editExpense ? 'w-[50%]' : 'flex-1'} py-3 bg-[#006948] rounded-lg items-center justify-center`}
+                className={`${editExpense ? 'w-[50%]' : 'flex-1'} py-3 bg-[#006269] rounded-lg items-center justify-center`}
                 disabled={createExpenseMutation.isPending || updateExpenseMutation.isPending || deleteExpenseMutation.isPending}
               >
                 {(createExpenseMutation.isPending || updateExpenseMutation.isPending) ? (
@@ -304,6 +304,6 @@ export default function ExpensesScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }

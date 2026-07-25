@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, Tag, RefreshCcw } from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
-import client from '../api/client';
+import { fetchSales } from '../api/resources';
 
 export default function SalesScreen({ navigation }: any) {
   const { data: sales, isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: ['sales'],
-    queryFn: async () => {
-      const response = await client.get(`/sales/`);
-      return response.data;
-    }
+    queryFn: fetchSales,
   });
 
   const onRefresh = React.useCallback(() => {
@@ -19,7 +16,7 @@ export default function SalesScreen({ navigation }: any) {
   }, [refetch]);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="px-4 py-3 bg-white border-b border-gray-200 flex-row items-center justify-between">
         <Text className="text-lg font-bold text-gray-900">Sales</Text>
@@ -32,7 +29,7 @@ export default function SalesScreen({ navigation }: any) {
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={() => navigation.navigate('NewSale')}
-            className="bg-[#006948] flex-row items-center px-3 py-1.5 rounded-full"
+            className="bg-[#006269] flex-row items-center px-3 py-1.5 rounded-full"
           >
             <Plus color="white" size={16} className="mr-1" />
             <Text className="text-white text-sm font-semibold">New</Text>
@@ -43,11 +40,11 @@ export default function SalesScreen({ navigation }: any) {
       <ScrollView 
         className="flex-1 p-4"
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={['#006948']} />
+          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={['#006269']} />
         }
       >
         {isLoading ? (
-          <ActivityIndicator size="large" color="#006948" className="mt-10" />
+          <ActivityIndicator size="large" color="#006269" className="mt-10" />
         ) : isError ? (
           <Text className="text-center text-red-500 mt-10">Error loading sales: {error?.message}</Text>
         ) : sales?.length === 0 ? (
@@ -64,20 +61,25 @@ export default function SalesScreen({ navigation }: any) {
                   <Tag color="#374151" size={20} />
                 </View>
                 <View className="flex-1">
-                  <Text className="font-medium text-gray-900 text-base">{sale.date}</Text>
-                  <Text className="text-xs text-gray-500 mt-1">Vehicle: {sale.vehicle_number || 'N/A'} {sale.driver_name ? `(${sale.driver_name})` : ''}</Text>
-                  <Text className="text-xs text-gray-500 mt-0.5">Birds: {sale.boxes * sale.birds_per_box} ({sale.weight} kg)</Text>
+                  <Text className="font-medium text-gray-900 text-base">
+                    {sale.party_name || 'Customer'} · {sale.date}
+                  </Text>
+                  <Text className="text-xs text-gray-500 mt-1">
+                    {(sale.items || [])
+                      .map((i: any) => `${i.item_name_en || 'Item'} (${i.quantity})`)
+                      .join(', ') || 'No items'}
+                  </Text>
                 </View>
               </View>
               <View className="items-end">
-                <Text className="text-base font-bold text-[#006948]">
-                  ₹{(sale.total_invoice_amount || 0).toLocaleString()}
+                <Text className="text-base font-bold text-[#006269]">
+                  ₹{(sale.total_amount || sale.total_invoice_amount || 0).toLocaleString()}
                 </Text>
               </View>
             </TouchableOpacity>
           ))
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

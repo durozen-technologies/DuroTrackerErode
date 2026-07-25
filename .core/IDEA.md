@@ -17,3 +17,10 @@ The application should support both **Android mobile devices** (primary platform
 6. **Reports & PDF Generation**: Purchase, Sales, Expense, and Party Ledger reports with PDF generation.
 
 The app must be simple, reliable, and prioritize fast data entry.
+
+## [2026-07-24 16:21:07] Live Broiler Trading Management System v2.0
+
+Full business workflow spec: Purchase → Inventory↑ → Customer Sales → Inventory↓ → Expenses → Dashboard → Reports.
+- Spec-first multi-item bills (Kg vs Unit), cash/UPI, automatic inventory, low-stock notifications.
+- Reports: purchaser/customer/item/date wise; outstanding ledgers.
+- Locked implementation choices: 1A (replace weighbridge forms) + 2B (full reports + notification screen).

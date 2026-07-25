@@ -1,8 +1,10 @@
+from pydantic import UUID7
+from pydantic import ConfigDict
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from typing import List, Optional
-from pydantic import BaseModel, UUID4, Field
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 from app.api import deps
@@ -13,7 +15,8 @@ router = APIRouter()
 # --- Schemas ---
 
 class ExpenseCategoryBase(BaseModel):
-    name: str
+    name_ta: str
+    name_en: str
     sort_order: int = 0
     is_active: bool = True
 
@@ -21,18 +24,18 @@ class ExpenseCategoryCreate(ExpenseCategoryBase):
     pass
 
 class ExpenseCategoryUpdate(ExpenseCategoryBase):
-    name: Optional[str] = None
+    name_ta: Optional[str] = None
+    name_en: Optional[str] = None
     sort_order: Optional[int] = None
     is_active: Optional[bool] = None
 
 class ExpenseCategoryResponse(ExpenseCategoryBase):
-    id: UUID4
+    id: UUID7
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ExpenseBase(BaseModel):
-    category_id: UUID4
+    category_id: UUID7
     expense_name: str
     cash_amount: float = 0.0
     upi_amount: float = 0.0
@@ -45,12 +48,11 @@ class ExpenseUpdate(ExpenseBase):
     pass
 
 class ExpenseResponse(ExpenseBase):
-    id: UUID4
+    id: UUID7
     spent_at: datetime
     total_amount: float
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # --- Routes for Categories ---
 
@@ -59,14 +61,15 @@ async def get_expense_categories(active_only: bool = True, db: AsyncSession = De
     query = select(ExpenseCategory)
     if active_only:
         query = query.where(ExpenseCategory.is_active == True)
-    query = query.order_by(ExpenseCategory.sort_order.asc(), ExpenseCategory.name.asc())
+    query = query.order_by(ExpenseCategory.sort_order.asc(), ExpenseCategory.name_en.asc())
     result = await db.execute(query)
     return result.scalars().all()
 
 @router.post("/categories", response_model=ExpenseCategoryResponse, status_code=status.HTTP_201_CREATED)
 async def create_expense_category(category: ExpenseCategoryCreate, db: AsyncSession = Depends(deps.get_db)):
     db_category = ExpenseCategory(
-        name=category.name,
+        name_ta=category.name_ta,
+        name_en=category.name_en,
         sort_order=category.sort_order,
         is_active=category.is_active
     )
@@ -76,7 +79,7 @@ async def create_expense_category(category: ExpenseCategoryCreate, db: AsyncSess
     return db_category
 
 @router.put("/categories/{category_id}", response_model=ExpenseCategoryResponse)
-async def update_expense_category(category_id: UUID4, category_update: ExpenseCategoryUpdate, db: AsyncSession = Depends(deps.get_db)):
+async def update_expense_category(category_id: UUID7, category_update: ExpenseCategoryUpdate, db: AsyncSession = Depends(deps.get_db)):
     result = await db.execute(select(ExpenseCategory).where(ExpenseCategory.id == category_id))
     db_category = result.scalar_one_or_none()
     if not db_category:
@@ -124,7 +127,7 @@ async def create_expense(expense: ExpenseCreate, db: AsyncSession = Depends(deps
     return db_expense
 
 @router.put("/{expense_id}", response_model=ExpenseResponse)
-async def update_expense(expense_id: UUID4, expense_update: ExpenseUpdate, db: AsyncSession = Depends(deps.get_db)):
+async def update_expense(expense_id: UUID7, expense_update: ExpenseUpdate, db: AsyncSession = Depends(deps.get_db)):
     result = await db.execute(select(Expense).where(Expense.id == expense_id))
     db_expense = result.scalar_one_or_none()
     if not db_expense:
@@ -151,7 +154,7 @@ async def update_expense(expense_id: UUID4, expense_update: ExpenseUpdate, db: A
     return db_expense
 
 @router.delete("/{expense_id}", status_code=204)
-async def delete_expense(expense_id: UUID4, db: AsyncSession = Depends(deps.get_db)):
+async def delete_expense(expense_id: UUID7, db: AsyncSession = Depends(deps.get_db)):
     result = await db.execute(select(Expense).where(Expense.id == expense_id))
     db_expense = result.scalar_one_or_none()
     if not db_expense:

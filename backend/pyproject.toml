@@ -1,18 +1,23 @@
 [project]
-name = "backend"
-version = "0.1.0"
-description = "Add your description here"
+name = "broiler360-backend"
+version = "2.0.0"
+description = "Broiler 360 trading API — purchases, sales, expenses, inventory"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "aiosqlite>=0.22.1",
     "alembic>=1.18.5",
     "asyncpg>=0.31.0",
     "fastapi>=0.139.2",
+    "httpx>=0.28.1",
     "passlib>=1.7.4",
     "psycopg2-binary>=2.9.12",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
     "python-jose[cryptography]>=3.5.0",
     "sqlalchemy>=2.0.51",
+    "uuid6>=2025.0.1",
     "uvicorn>=0.51.0",
 ]

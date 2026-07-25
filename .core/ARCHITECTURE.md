@@ -46,3 +46,18 @@ Layer-Brolier (Root)
 ├── frontend_mobile/  # Expo React Native App
 └── frontend_web/     # Vite React App (Planned)
 ```
+
+
+### [2026-07-24 14:58:50] - New Architecture (Master-Detail)
+Backend moved to a standard Master-Detail entity relation for transactions to support multi-item bills.
+Inventory calculations are now driven by `InventoryService` interacting with a Master `Item` Catalog rather than being embedded inside individual purchase/sale columns.
+
+### [2026-07-24 16:21:07] - Reports API + Spec-First Mobile Bills
+- Added `reports` router for SQL-aggregated purchase/sales/inventory/expense/outstanding reports.
+- Dashboard stats accept `date_from` / `date_to`.
+- Mobile purchase/sale screens switched from broiler weighbridge UI to multi-item Kg/Unit bills.
+- Added Items master and Notifications (low-stock) stack screens.
+
+### [2026-07-24 16:28:32] - Repo hygiene
+- Removed ad-hoc backend/root scratch scripts; documented layout in root `README.md`.
+- Shared Pydantic contracts under `app/schemas`; mobile API helpers under `src/api/resources.ts`.

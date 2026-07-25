@@ -253,3 +253,85 @@
 - [2026-07-24 11:40:00] Fixed a bug in NewSaleScreen where new sales were being saved to the database with a weight of 0. The UI mutation was incorrectly sending `net_weight` in the JSON payload, which the backend Pydantic `SaleCreate` schema dropped since it expects the field to be named `weight`. Changed the mutation payload key from `net_weight` to `weight`.
 
 - [2026-07-24 11:45:00] Fixed a backend bug in `create_sale` endpoint where `birds_per_box` and `actual_birds` were not being assigned to the new `Sale` model instance when saving to the database, resulting in them being stored as `0`. Added mapping for these two fields in `sales.py`.
+
+### [2026-07-24 13:17:48]
+**Request:** Install agent-skills, ponytail, and impeccable in the project codebase for the agent
+**Action:** Cloned the respective repositories to a temporary directory and copied their skills and AGENTS.md rules into the .agents directory in the project codebase.
+
+### [2026-07-24 13:34:33]
+**Request:** Optimize backend, setup UUID7, configure testing architecture and db separation, restructure app.
+**Action:** 
+- Installed uuid6, pytest, httpx.
+- Updated app/models/base.py to use uuid6.uuid7().
+- Created tests/conftest.py with isolated async DB sessions and httpx test client.
+- Added app/schemas and app/services directories to adhere to API design skills.
+- Cleared Pydantic V1 deprecation warnings across all endpoints.
+
+### [2026-07-24 13:39:07]
+**Request:** Update backend/main.py to make it production grade.
+**Action:** Overwrote backend/main.py with a production-ready python entry point utilizing multiprocessing to scale uvicorn workers based on CPU core count, configuring proxy headers, and disabling hot reloading.
+
+
+### [2026-07-24 14:58:50] - Backend Rewrite to Master-Detail (Version 2.0)
+**User Request:** Refactor backend to V2 logic, master-detail architecture, fix 500 error on dashboard.
+**Action Taken:** 
+- Dropped existing database schema and recreated using new models.
+- Migrated Purchase and Sale models to Header-Item logic (PurchaseItem, SaleItem).
+- Added Item model to act as a Master Catalog for tracking available/used stock.
+- Built InventoryService to dynamically compute inventory.
+- Refactored /api/dashboard/stats to aggregate data without 500 errors and compute low-stock alerts dynamically.
+- Extracted logic to API routers (items, purchases, sales, expenses, dashboard).
+
+### [2026-07-24 15:30:00] - Frontend V2 Integration
+**User Request:** also update the frontend until backend updated.
+**Action Taken:**
+- Re-added `driver_name` and `vehicle_number` to `Purchase` and `Sale` models and routes as they were dropped in V2.
+- Wiped database and ran Alembic autogenerate to recreate schema.
+- Seeded default "Broiler Bird" item.
+- Updated `NewPurchaseScreen.tsx` and `NewSaleScreen.tsx` using a Ponytail approach: kept the highly optimized Broiler UI as-is, but packaged the form state into the nested `items: [...]` array expected by the V2 API.
+- Updated `PurchasesScreen` and `SalesScreen` list views to safely read properties from the `items` array.
+
+### [2026-07-24 15:37:00] - UUID7 Integration
+**User Request:** convert uuid4 into uuid7
+**Action Taken:** Updated all Pydantic schema models in the API routes to use the native `UUID7` type imported directly from `pydantic` for strict validation of Version 7 UUIDs.
+
+### [2026-07-24 15:45:00] - Reports and Dashboard Updates
+**User Request:** implement Business Workflow & Logic Version 2.0 (Reports and Dashboard)
+**Action Taken:** Updated `dashboard.py` to filter sales, purchases, and expenses by today's date using SQL cast. Created a new `ReportsScreen.tsx` in the frontend that uses the Ponytail method (reusing existing endpoints) to display 5 distinct report tabs (Purchases, Sales, Inventory, Expenses, Outstanding). Added a navigation button to this screen from the Dashboard header.
+
+### [2026-07-24 16:21:07] - Full Broiler Trading v2.0 Workflow
+**User Request:** Implement Business Workflow & Logic Version 2.0 (1A forms + 2B full reports/notifications).
+**Action Taken:**
+- Party: `company_name`, `is_active`, required mobile, PUT; Purchaser=SUPPLIER / Customer=CUSTOMER UI.
+- Item PUT + `?low_stock=true`; InventoryService oversell guard + revert helpers.
+- Purchase/Sale: server-side amounts, party-type enforce, PUT update, low_stock_alerts on mutation.
+- New `/api/reports/*` aggregates; dashboard `date_from`/`date_to`.
+- Mobile: multi-item Kg/Unit purchase & sale forms; Items + Notifications screens; Reports with filters/group_by; Dashboard chips wired.
+- Tests: `tests/api/test_workflow.py` (stock, oversell, reports) — 3 passed.
+
+### [2026-07-24 16:28:32] - Codebase cleanup & structure
+**User Request:** Remove unwanted files; make structure professional.
+**Action Taken:**
+- Deleted one-off scripts: `append_logs.py`, `Projectidea.md`, backend `fix_db`/`seed*`/`test_*`/`alter_enum`/`check_enum`/`verify_party_db`.
+- Shared `LowStockAlert` in `app/schemas`; package `__init__.py` markers; README rewrite.
+- Mobile: `src/types.ts`, `src/api/resources.ts`; list/dashboard screens use resource helpers; `.env` gitignored.
+
+### [2026-07-24 16:35:44] - Test suite structure
+**User Request:** Add test dir with unit, integration, and API testing via FastAPI client.
+**Action Taken:**
+- `tests/{unit,integration,api}/` with pytest markers
+- Fixtures: `engine`, `db_session`, FastAPI `httpx.AsyncClient` (ASGITransport)
+- SQLite fallback when Postgres is down; `aiosqlite` dependency
+- 17 tests covering InventoryService, ORM flow, parties/items/purchases/sales/reports/expenses/health
+[2026-07-25 11:30:44] Fixed 'Cannot find name Tag' error in DashboardScreen.tsx by importing Tag from lucide-react-native
+[2026-07-25 11:36:50] Fixed navigation bar overlap by setting tabBarPosition to bottom and using insets.bottom for padding in RootNavigator.tsx
+[2026-07-25 11:41:54] Installed pbakaus/impeccable in the project
+[2026-07-25 11:44:00] Applied Impeccable polish to the app navigation bar styling in RootNavigator.tsx
+[2026-07-25 11:48:34] Fixed Impeccable finding by overriding react-native-safe-area-context transition: padding on Web in global.css
+[2026-07-25 11:53:50] Applied Impeccable colorize skill. Replaced generic Tailwind default colors with a semantic, cohesive brand-aligned palette in tailwind.config.js and refactored DashboardScreen and RootNavigator to use the new tokens.
+[2026-07-25 11:56:06] User selected a new primary teal brand color (#006269). I updated all semantic palette tokens to coordinate with this teal base and recursively replaced all hardcoded instances of the old green across the app.
+[2026-07-25 11:58:29] Applied Impeccable colorize guidance to the Quick Navigation icons, giving each button a sophisticated, distinct color while keeping them harmonious with the new teal brand.
+[2026-07-25 12:00:59] Fixed navigation tab bar text breaking/wrapping by providing a custom tabBarLabel with numberOfLines={1} and adjustsFontSizeToFit, and removing horizontal padding.
+[2026-07-25 12:02:03] Applied distinct color coding (indigo, amber, rose, teal) to the active tabs in the bottom navigation bar in RootNavigator.tsx to match the Quick Navigation styling.
+[2026-07-25 12:09:26] Fixed top bar overlay issue across all tab screens by wrapping the MainTabNavigator in a SafeAreaView with edges={['top']} and white background.
+[2026-07-25 12:20:58] Resolved syntax error in src/types.ts caused by an invalid Python docstring syntax ('"""Shared TypeScript contracts..."""') which broke compilation, and verified RootNavigator.tsx structure.

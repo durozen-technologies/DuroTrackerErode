@@ -23,7 +23,8 @@ export default function ExpenseCategoriesScreen() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (newCat: any) => createExpenseCategory(newCat.name, newCat.sortOrder, newCat.isActive),
+    mutationFn: (newCat: any) =>
+      createExpenseCategory(newCat.name, newCat.name, newCat.sortOrder, newCat.isActive),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenseCategories'] });
       closeModal();
@@ -54,7 +55,7 @@ export default function ExpenseCategoriesScreen() {
 
   const openEditModal = (cat: ExpenseCategory) => {
     setEditingId(cat.id);
-    setName(cat.name);
+    setName(cat.name_en);
     setSortOrder(cat.sort_order.toString());
     setIsActive(cat.is_active);
     setModalVisible(true);
@@ -75,7 +76,7 @@ export default function ExpenseCategoriesScreen() {
     if (editingId) {
       updateMutation.mutate({
         id: editingId,
-        updates: { name, sort_order: orderNum, is_active: isActive }
+        updates: { name_en: name, name_ta: name, sort_order: orderNum, is_active: isActive }
       });
     } else {
       createMutation.mutate({ name, sortOrder: orderNum, isActive });
@@ -90,14 +91,14 @@ export default function ExpenseCategoriesScreen() {
           <ArrowLeft color="#111827" size={24} />
         </TouchableOpacity>
         <Text className="flex-1 text-xl font-bold text-gray-900">Expense Categories</Text>
-        <TouchableOpacity onPress={openAddModal} className="w-10 h-10 bg-[#006948] rounded-full items-center justify-center">
+        <TouchableOpacity onPress={openAddModal} className="w-10 h-10 bg-[#006269] rounded-full items-center justify-center">
           <Plus color="white" size={20} />
         </TouchableOpacity>
       </View>
 
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#006948" />
+          <ActivityIndicator size="large" color="#006269" />
         </View>
       ) : (
         <ScrollView className="flex-1 p-4">
@@ -108,7 +109,7 @@ export default function ExpenseCategoriesScreen() {
               className={`bg-white p-4 rounded-xl border mb-3 flex-row items-center justify-between shadow-sm ${cat.is_active ? 'border-gray-200' : 'border-red-200 opacity-70'}`}
             >
               <View className="justify-center">
-                <Text className="text-base font-bold text-gray-900">{cat.name}</Text>
+                <Text className="text-base font-bold text-gray-900">{cat.name_en}</Text>
                 <Text className="text-xs text-gray-500 mt-1">{cat.is_active ? 'Active' : 'Inactive'}</Text>
               </View>
               <Edit2 color="#9ca3af" size={18} />
@@ -146,7 +147,7 @@ export default function ExpenseCategoriesScreen() {
               <Switch 
                 value={isActive} 
                 onValueChange={setIsActive}
-                trackColor={{ false: '#d1d5db', true: '#006948' }}
+                trackColor={{ false: '#d1d5db', true: '#006269' }}
               />
             </View>
 
@@ -156,7 +157,7 @@ export default function ExpenseCategoriesScreen() {
               </TouchableOpacity>
               <TouchableOpacity 
                 onPress={handleSave} 
-                className="flex-1 py-3 bg-[#006948] rounded-lg items-center"
+                className="flex-1 py-3 bg-[#006269] rounded-lg items-center"
                 disabled={createMutation.isPending || updateMutation.isPending}
               >
                 {createMutation.isPending || updateMutation.isPending ? (

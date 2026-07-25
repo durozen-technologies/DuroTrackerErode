@@ -12,7 +12,8 @@ class ExpenseCategory(Base, BaseModelMixin):
     __tablename__ = "expense_categories"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, index=True, default=uuid7)
-    name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    name_ta: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    name_en: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, server_default=text("0"), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"), nullable=False)
     
