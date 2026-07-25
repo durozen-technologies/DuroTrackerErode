@@ -1,16 +1,19 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Learn more: https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
 # dependencies
 node_modules/
 
 # Expo
 .expo/
+.expo-shared/
 dist/
 web-build/
 expo-env.d.ts
 
-# Native
+# Native (generated)
 .kotlin/
+ios/
+android/
 *.orig.*
 *.jks
 *.p8
@@ -30,13 +33,11 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env files (keep .env.example)
 .env
+.env.*
+!.env.example
 .env*.local
 
 # typescript
 *.tsbuildinfo
-
-# generated native folders
-/ios
-/android
