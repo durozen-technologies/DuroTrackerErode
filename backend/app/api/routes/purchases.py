@@ -13,7 +13,6 @@ from app.models.item import Item
 from app.models.transaction import PaymentTransaction
 from app.models.enums import TransactionType, PartyType
 from app.services.inventory_service import InventoryService
-from app.schemas import LowStockAlert
 
 router = APIRouter()
 
@@ -63,7 +62,6 @@ class PurchaseResponse(BaseModel):
     vehicle_number: Optional[str] = None
     items: List[PurchaseItemResponse]
     party_name: Optional[str] = None
-    low_stock_alerts: List[LowStockAlert] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -73,7 +71,6 @@ def _line_amount(quantity: float, rate: float) -> float:
 
 
 async def _build_purchase_response(db: AsyncSession, purchase: Purchase) -> dict:
-    alerts = await InventoryService.get_low_stock_alerts(db)
     party_name = purchase.party.name if purchase.party else None
     items_out = []
     for li in purchase.items:
@@ -102,7 +99,6 @@ async def _build_purchase_response(db: AsyncSession, purchase: Purchase) -> dict
         "vehicle_number": purchase.vehicle_number,
         "items": items_out,
         "party_name": party_name,
-        "low_stock_alerts": alerts,
     }
 
 
@@ -278,12 +274,7 @@ async def get_purchases(db: AsyncSession = Depends(deps.get_db)):
         .order_by(Purchase.date.desc())
     )
     purchases = result.scalars().all()
-    out = []
-    for p in purchases:
-        data = await _build_purchase_response(db, p)
-        data["low_stock_alerts"] = []  # list endpoints skip alerts noise
-        out.append(data)
-    return out
+    return [await _build_purchase_response(db, p) for p in purchases]
 
 
 @router.delete("/{purchase_id}", status_code=204)

@@ -1,7 +1,6 @@
 from app.schemas.base import (
     APIError,
     ErrorDetail,
-    LowStockAlert,
     PaginatedResponse,
     Pagination,
 )
@@ -9,7 +8,6 @@ from app.schemas.base import (
 __all__ = [
     "APIError",
     "ErrorDetail",
-    "LowStockAlert",
     "PaginatedResponse",
     "Pagination",
 ]

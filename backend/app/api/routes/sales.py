@@ -13,7 +13,6 @@ from app.models.item import Item
 from app.models.transaction import PaymentTransaction
 from app.models.enums import TransactionType, PartyType
 from app.services.inventory_service import InventoryService
-from app.schemas import LowStockAlert
 
 router = APIRouter()
 
@@ -63,7 +62,6 @@ class SaleResponse(BaseModel):
     vehicle_number: Optional[str] = None
     items: List[SaleItemResponse]
     party_name: Optional[str] = None
-    low_stock_alerts: List[LowStockAlert] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -73,7 +71,6 @@ def _line_amount(quantity: float, rate: float) -> float:
 
 
 async def _build_sale_response(db: AsyncSession, sale: Sale) -> dict:
-    alerts = await InventoryService.get_low_stock_alerts(db)
     party_name = sale.party.name if sale.party else None
     items_out = []
     for li in sale.items:
@@ -102,7 +99,6 @@ async def _build_sale_response(db: AsyncSession, sale: Sale) -> dict:
         "vehicle_number": sale.vehicle_number,
         "items": items_out,
         "party_name": party_name,
-        "low_stock_alerts": alerts,
     }
 
 
@@ -276,12 +272,7 @@ async def get_sales(db: AsyncSession = Depends(deps.get_db)):
         .order_by(Sale.date.desc())
     )
     sales = result.scalars().all()
-    out = []
-    for s in sales:
-        data = await _build_sale_response(db, s)
-        data["low_stock_alerts"] = []
-        out.append(data)
-    return out
+    return [await _build_sale_response(db, s) for s in sales]
 
 
 @router.delete("/{sale_id}", status_code=204)

@@ -1,11 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft } from 'lucide-react-native';
-import { useQuery } from '@tanstack/react-query';
-import client from '../api/client';
+import { ArrowLeft, Printer } from 'lucide-react-native';
+import { useQueries, useQuery } from '@tanstack/react-query';
+import { fetchReport } from '../api/resources';
+import { exportReportToPdf } from '../utils/pdfReport';
+import { OverallReportView, type OverallReportData } from '../components/reports/OverallReportView';
+import { InventoryItemCard } from '../components/inventory/InventoryItemCard';
 
-type ReportType = 'Purchases' | 'Sales' | 'Inventory' | 'Expenses' | 'Outstanding';
+type ReportType = 'Overall' | 'Purchases' | 'Sales' | 'Inventory' | 'Expenses' | 'Outstanding';
 type GroupBy = 'date' | 'party' | 'item' | 'category';
 
 function toYMD(d: Date) {
@@ -13,7 +16,7 @@ function toYMD(d: Date) {
 }
 
 export default function ReportsScreen({ navigation }: any) {
-  const [activeTab, setActiveTab] = useState<ReportType>('Purchases');
+  const [activeTab, setActiveTab] = useState<ReportType>('Overall');
   const [groupBy, setGroupBy] = useState<GroupBy>('date');
   const today = toYMD(new Date());
   const weekAgo = (() => {
@@ -23,6 +26,7 @@ export default function ReportsScreen({ navigation }: any) {
   })();
   const [dateFrom, setDateFrom] = useState(weekAgo);
   const [dateTo, setDateTo] = useState(today);
+  const [exporting, setExporting] = useState(false);
 
   const endpoint = useMemo(() => {
     const q = `from=${dateFrom}&to=${dateTo}`;
@@ -38,16 +42,71 @@ export default function ReportsScreen({ navigation }: any) {
       case 'Outstanding':
         return `/reports/outstanding`;
       default:
-        return `/reports/purchases?${q}`;
+        return null;
     }
   }, [activeTab, groupBy, dateFrom, dateTo]);
 
+  // Single-tab fetch (skipped for Overall — useQueries below)
   const { data, isLoading, error } = useQuery({
     queryKey: ['reports', endpoint],
-    queryFn: async () => (await client.get(endpoint)).data,
+    queryFn: () => fetchReport(endpoint!),
+    enabled: activeTab !== 'Overall' && !!endpoint,
   });
 
-  const tabs: ReportType[] = ['Purchases', 'Sales', 'Inventory', 'Expenses', 'Outstanding'];
+  // Overall: parallel fetches, shared query keys with individual tabs for cache reuse
+  const overallEndpoints = useMemo(() => {
+    const q = `from=${dateFrom}&to=${dateTo}`;
+    return {
+      purchases: `/reports/purchases?${q}&group_by=date`,
+      sales: `/reports/sales?${q}&group_by=date`,
+      expenses: `/reports/expenses?${q}&group_by=date`,
+      inventory: `/reports/inventory`,
+      outstanding: `/reports/outstanding`,
+    };
+  }, [dateFrom, dateTo]);
+
+  const overallQueries = useQueries({
+    queries: [
+      {
+        queryKey: ['reports', overallEndpoints.purchases],
+        queryFn: () => fetchReport(overallEndpoints.purchases),
+        enabled: activeTab === 'Overall',
+      },
+      {
+        queryKey: ['reports', overallEndpoints.sales],
+        queryFn: () => fetchReport(overallEndpoints.sales),
+        enabled: activeTab === 'Overall',
+      },
+      {
+        queryKey: ['reports', overallEndpoints.expenses],
+        queryFn: () => fetchReport(overallEndpoints.expenses),
+        enabled: activeTab === 'Overall',
+      },
+      {
+        queryKey: ['reports', overallEndpoints.inventory],
+        queryFn: () => fetchReport(overallEndpoints.inventory),
+        enabled: activeTab === 'Overall',
+      },
+      {
+        queryKey: ['reports', overallEndpoints.outstanding],
+        queryFn: () => fetchReport(overallEndpoints.outstanding),
+        enabled: activeTab === 'Overall',
+      },
+    ],
+  });
+
+  const overallLoading = overallQueries.some((q) => q.isLoading);
+  const overallError = overallQueries.some((q) => q.isError);
+  const overallData: OverallReportData = {
+    purchases: overallQueries[0].data,
+    sales: overallQueries[1].data,
+    expenses: overallQueries[2].data,
+    inventory: overallQueries[3].data,
+    outstanding: overallQueries[4].data,
+  };
+  const overallReady = overallQueries.every((q) => q.isSuccess);
+
+  const tabs: ReportType[] = ['Overall', 'Purchases', 'Sales', 'Inventory', 'Expenses', 'Outstanding'];
   const groupOptions: GroupBy[] =
     activeTab === 'Expenses'
       ? ['date', 'category']
@@ -55,13 +114,58 @@ export default function ReportsScreen({ navigation }: any) {
         ? ['date', 'party', 'item']
         : [];
 
+  const showDateFilters = activeTab === 'Overall' || (activeTab !== 'Inventory' && activeTab !== 'Outstanding');
+  const exportDisabled =
+    exporting ||
+    (activeTab === 'Overall' ? overallLoading || !overallReady : isLoading || !data);
+
+  const handleExport = async () => {
+    if (exportDisabled) return;
+    setExporting(true);
+    try {
+      if (activeTab === 'Overall') {
+        await exportReportToPdf({
+          activeTab: 'Overall',
+          dateFrom,
+          dateTo,
+          groupBy: 'date',
+          data: overallData,
+        });
+      } else {
+        await exportReportToPdf({ activeTab, dateFrom, dateTo, groupBy, data });
+      }
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="px-4 py-3 bg-white border-b border-gray-200 flex-row items-center">
-        <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3">
-          <ArrowLeft size={22} color="#111827" />
+      <View className="px-4 py-3 bg-white border-b border-gray-200 flex-row items-center justify-between">
+        <View className="flex-row items-center">
+          <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3" accessibilityRole="button" accessibilityLabel="Go back">
+            <ArrowLeft size={22} color="#111827" />
+          </TouchableOpacity>
+          <Text className="text-lg font-bold text-gray-900">Reports</Text>
+        </View>
+        <TouchableOpacity
+          onPress={handleExport}
+          disabled={exportDisabled}
+          accessibilityRole="button"
+          accessibilityLabel="Export PDF"
+          className={`flex-row items-center px-3 py-1.5 rounded-lg border ${
+            exportDisabled ? 'border-gray-200 bg-gray-50' : 'border-gray-900 bg-gray-900'
+          }`}
+        >
+          {exporting ? (
+            <ActivityIndicator size="small" color="#9ca3af" />
+          ) : (
+            <Printer size={15} color={exportDisabled ? '#9ca3af' : '#ffffff'} />
+          )}
+          <Text className={`text-xs font-bold ml-1.5 ${exportDisabled ? 'text-gray-400' : 'text-white'}`}>
+            {exporting ? 'Exporting…' : 'Export PDF'}
+          </Text>
         </TouchableOpacity>
-        <Text className="text-lg font-bold text-gray-900">Reports</Text>
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} className="bg-white border-b border-gray-200 px-2">
@@ -70,8 +174,10 @@ export default function ReportsScreen({ navigation }: any) {
             key={t}
             onPress={() => {
               setActiveTab(t);
-              setGroupBy(t === 'Expenses' ? 'date' : 'date');
+              setGroupBy('date');
             }}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === t }}
             className={`px-4 py-3 ${activeTab === t ? 'border-b-2 border-[#006269]' : ''}`}
           >
             <Text className={`text-sm font-semibold ${activeTab === t ? 'text-[#006269]' : 'text-gray-500'}`}>{t}</Text>
@@ -79,15 +185,25 @@ export default function ReportsScreen({ navigation }: any) {
         ))}
       </ScrollView>
 
-      {activeTab !== 'Inventory' && activeTab !== 'Outstanding' && (
+      {showDateFilters && (
         <View className="px-4 py-3 bg-white border-b border-gray-100 flex-row gap-2">
           <View className="flex-1">
             <Text className="text-[10px] text-gray-500 mb-1">From</Text>
-            <TextInput value={dateFrom} onChangeText={setDateFrom} className="border border-gray-300 rounded-md px-2 py-1.5 text-sm" />
+            <TextInput
+              value={dateFrom}
+              onChangeText={setDateFrom}
+              accessibilityLabel="From date"
+              className="border border-gray-300 rounded-md px-2 py-1.5 text-sm text-gray-900"
+            />
           </View>
           <View className="flex-1">
             <Text className="text-[10px] text-gray-500 mb-1">To</Text>
-            <TextInput value={dateTo} onChangeText={setDateTo} className="border border-gray-300 rounded-md px-2 py-1.5 text-sm" />
+            <TextInput
+              value={dateTo}
+              onChangeText={setDateTo}
+              accessibilityLabel="To date"
+              className="border border-gray-300 rounded-md px-2 py-1.5 text-sm text-gray-900"
+            />
           </View>
         </View>
       )}
@@ -98,6 +214,8 @@ export default function ReportsScreen({ navigation }: any) {
             <TouchableOpacity
               key={g}
               onPress={() => setGroupBy(g)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: groupBy === g }}
               className={`px-3 py-1.5 rounded-full mr-2 ${groupBy === g ? 'bg-[#006269]' : 'bg-gray-100'}`}
             >
               <Text className={`text-xs font-semibold capitalize ${groupBy === g ? 'text-white' : 'text-gray-600'}`}>
@@ -109,23 +227,18 @@ export default function ReportsScreen({ navigation }: any) {
       )}
 
       <ScrollView className="flex-1 p-4">
-        {isLoading ? (
+        {activeTab === 'Overall' ? (
+          <OverallReportView data={overallData} isLoading={overallLoading} error={overallError} />
+        ) : isLoading ? (
           <ActivityIndicator size="large" color="#006269" className="mt-10" />
         ) : error ? (
           <Text className="text-red-500 text-center mt-10">Failed to load report</Text>
         ) : activeTab === 'Inventory' ? (
-          (data || []).map((row: any) => (
-            <View key={row.item_id} className="bg-white border border-gray-200 rounded-xl p-4 mb-3">
-              <Text className="font-bold text-gray-900">
-                {row.name_en} ({row.name_ta})
-              </Text>
-              <Text className="text-xs text-gray-500 mb-2">{row.unit_type}</Text>
-              <Text className="text-sm text-gray-700">Available: {row.available_stock}</Text>
-              <Text className="text-sm text-gray-700">Used: {row.used_stock}</Text>
-              <Text className="text-sm text-gray-700">Purchased: {row.purchased_quantity}</Text>
-              <Text className="text-sm text-gray-700">Sold: {row.sold_quantity}</Text>
-            </View>
-          ))
+          (data || []).length === 0 ? (
+            <Text className="text-sm text-content-secondary text-center mt-10">No inventory items.</Text>
+          ) : (
+            (data || []).map((row: any) => <InventoryItemCard key={row.item_id} row={row} />)
+          )
         ) : activeTab === 'Outstanding' ? (
           (data || []).map((row: any) => (
             <View key={row.party_id} className="bg-white border border-gray-200 rounded-xl p-4 mb-3">

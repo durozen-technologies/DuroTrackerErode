@@ -44,6 +44,9 @@ class InventoryReportRow(BaseModel):
     purchased_quantity: float
     sold_quantity: float
     remaining_stock: float
+    purchased_count: int
+    sold_count: int
+    available_count: int
 
 
 class ExpenseReportRow(BaseModel):
@@ -215,6 +218,7 @@ async def inventory_report(db: AsyncSession = Depends(deps.get_db)):
         select(
             PurchaseItem.item_id.label("item_id"),
             func.coalesce(func.sum(PurchaseItem.quantity), 0).label("purchased"),
+            func.coalesce(func.sum(PurchaseItem.count), 0).label("purchased_count"),
         )
         .group_by(PurchaseItem.item_id)
         .subquery()
@@ -223,6 +227,7 @@ async def inventory_report(db: AsyncSession = Depends(deps.get_db)):
         select(
             SaleItem.item_id.label("item_id"),
             func.coalesce(func.sum(SaleItem.quantity), 0).label("sold"),
+            func.coalesce(func.sum(SaleItem.count), 0).label("sold_count"),
         )
         .group_by(SaleItem.item_id)
         .subquery()
@@ -232,6 +237,8 @@ async def inventory_report(db: AsyncSession = Depends(deps.get_db)):
             Item,
             func.coalesce(purchased.c.purchased, 0).label("purchased_quantity"),
             func.coalesce(sold.c.sold, 0).label("sold_quantity"),
+            func.coalesce(purchased.c.purchased_count, 0).label("purchased_count"),
+            func.coalesce(sold.c.sold_count, 0).label("sold_count"),
         )
         .outerjoin(purchased, purchased.c.item_id == Item.id)
         .outerjoin(sold, sold.c.item_id == Item.id)
@@ -239,7 +246,9 @@ async def inventory_report(db: AsyncSession = Depends(deps.get_db)):
     )
     result = await db.execute(stmt)
     rows = []
-    for item, purchased_qty, sold_qty in result.all():
+    for item, purchased_qty, sold_qty, purchased_count, sold_count in result.all():
+        p_count = int(purchased_count or 0)
+        s_count = int(sold_count or 0)
         rows.append(
             InventoryReportRow(
                 item_id=item.id,
@@ -251,6 +260,9 @@ async def inventory_report(db: AsyncSession = Depends(deps.get_db)):
                 purchased_quantity=float(purchased_qty),
                 sold_quantity=float(sold_qty),
                 remaining_stock=float(item.available_stock),
+                purchased_count=p_count,
+                sold_count=s_count,
+                available_count=p_count - s_count,
             )
         )
     return rows

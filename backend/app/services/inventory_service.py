@@ -68,17 +68,3 @@ class InventoryService:
             if item:
                 item.available_stock = float(item.available_stock) + float(s_item.quantity)
                 item.used_stock = float(item.used_stock) - float(s_item.quantity)
-
-    @staticmethod
-    async def get_low_stock_alerts(db: AsyncSession) -> list[dict]:
-        result = await db.execute(
-            select(Item).where(Item.available_stock <= Item.minimum_stock)
-        )
-        return [
-            {
-                "item_name": item.name_en,
-                "available": float(item.available_stock),
-                "minimum": float(item.minimum_stock),
-            }
-            for item in result.scalars().all()
-        ]

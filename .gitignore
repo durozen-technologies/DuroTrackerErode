@@ -41,6 +41,9 @@ htmlcov/
 .tox/
 .nox/
 *.log
+*.db
+*.sqlite
+*.sqlite3
 
 # --- Node / Expo / frontend ---
 node_modules/
@@ -59,6 +62,12 @@ yarn-error.*
 *.p12
 *.key
 *.mobileprovision
+*.apk
+*.aab
+*.ipa
+*.pem
+*.orig.*
+.kotlin/
 frontend_mobile/ios/
 frontend_mobile/android/
 
@@ -67,10 +76,22 @@ frontend_mobile/android/
 .gemini/
 .impeccable/
 .cursor/
+.antigravity/
+.claude/
+.opencode/
+.pi/
+.qoder/
+.rovodev/
+.trae*/
+.vibe/
+.grok/
+.kiro/
+graphify-out/
 *.local.json
 
 # --- Misc ---
 *.tmp
 *.temp
+*.pdf
 .cache/
 coverage/

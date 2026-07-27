@@ -181,15 +181,15 @@ export default function DashboardScreen() {
           </View>
           <View className="flex-row gap-3">
             <TouchableOpacity
-              onPress={() => navigation.navigate('Items')}
+              onPress={() => navigation.navigate('Inventory')}
               className="flex-1 bg-surface p-4 rounded-xl border border-border flex-row items-center shadow-sm"
             >
               <View className="w-10 h-10 rounded-lg bg-slate-100 items-center justify-center mr-3">
                 <Package color="#475569" size={20} />
               </View>
               <View className="flex-1">
-                <Text className="text-sm font-bold text-content-primary">Items Master</Text>
-                <Text className="text-xs text-content-secondary">Manage stock</Text>
+                <Text className="text-sm font-bold text-content-primary">Inventory</Text>
+                <Text className="text-xs text-content-secondary">Stock · parties · bills</Text>
               </View>
             </TouchableOpacity>
           </View>

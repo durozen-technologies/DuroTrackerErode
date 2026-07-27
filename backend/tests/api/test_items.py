@@ -6,14 +6,13 @@ from httpx import AsyncClient
 
 @pytest.mark.api
 @pytest.mark.asyncio
-async def test_create_update_and_low_stock_filter(client: AsyncClient):
+async def test_create_and_update_item(client: AsyncClient):
     created = await client.post(
         "/api/items/",
         json={
             "name_ta": "முட்டை",
             "name_en": "Egg",
             "unit_type": "UNIT",
-            "minimum_stock": 100,
         },
     )
     assert created.status_code == 201, created.text
@@ -21,15 +20,13 @@ async def test_create_update_and_low_stock_filter(client: AsyncClient):
     assert item["unit_type"] == "UNIT"
     assert float(item["available_stock"]) == 0
 
-    # 0 available <= 100 minimum → low stock
-    low = await client.get("/api/items/?low_stock=true")
-    assert low.status_code == 200
-    assert any(i["id"] == item["id"] for i in low.json())
+    listed = await client.get("/api/items/")
+    assert listed.status_code == 200
+    assert any(i["id"] == item["id"] for i in listed.json())
 
     updated = await client.put(
         f"/api/items/{item['id']}",
-        json={"minimum_stock": 0, "name_en": "Eggs"},
+        json={"name_en": "Eggs"},
     )
     assert updated.status_code == 200
     assert updated.json()["name_en"] == "Eggs"
-    assert float(updated.json()["minimum_stock"]) == 0

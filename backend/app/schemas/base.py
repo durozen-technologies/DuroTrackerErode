@@ -24,9 +24,3 @@ class ErrorDetail(BaseModel):
 
 class APIError(BaseModel):
     error: ErrorDetail
-
-
-class LowStockAlert(BaseModel):
-    item_name: str
-    available: float
-    minimum: float

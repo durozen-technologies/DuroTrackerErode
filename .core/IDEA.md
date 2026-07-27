@@ -24,3 +24,7 @@ Full business workflow spec: Purchase → Inventory↑ → Customer Sales → In
 - Spec-first multi-item bills (Kg vs Unit), cash/UPI, automatic inventory, low-stock notifications.
 - Reports: purchaser/customer/item/date wise; outstanding ledgers.
 - Locked implementation choices: 1A (replace weighbridge forms) + 2B (full reports + notification screen).
+
+## [2026-07-27 13:18:00] Comprehensive Gitignore & Tooling Isolation Policy
+
+Maintain a strict, clean repository state by isolating all temporary runtime output, offline DB fallbacks (`*.db`, `*.sqlite*`), mobile builds (`*.apk`, `*.aab`, `*.ipa`), generated monochrome PDF reports (`*.pdf`), and agent harness/knowledge graph directories (`graphify-out/`, `.antigravity/`, etc.) directly within the root `.gitignore`, ensuring zero developer environment leakage.

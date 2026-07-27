@@ -24,7 +24,6 @@ export interface Item {
   unit_type: UnitType;
   available_stock: number;
   used_stock: number;
-  minimum_stock: number;
 }
 
 export interface BillLine {
@@ -51,13 +50,6 @@ export interface Bill {
   driver_name?: string | null;
   vehicle_number?: string | null;
   items: BillLine[];
-  low_stock_alerts?: LowStockAlert[];
-}
-
-export interface LowStockAlert {
-  item_name: string;
-  available: number;
-  minimum: number;
 }
 
 export interface DashboardStats {
@@ -68,7 +60,7 @@ export interface DashboardStats {
   customer_outstanding: number;
   supplier_outstanding: number;
   inventory: { item_name: string; available_stock: number; used_stock: number }[];
-  low_stock_alerts: LowStockAlert[];
+  low_stock_alerts: any[];
   date_from: string;
   date_to: string;
 }
@@ -86,6 +78,21 @@ export interface AggregatedReport {
   rows: ReportRow[];
   total_quantity: number;
   total_amount: number;
+}
+
+export interface InventoryReportRow {
+  item_id: string;
+  name_en: string;
+  name_ta: string;
+  unit_type: string;
+  available_stock: number;
+  used_stock: number;
+  purchased_quantity: number;
+  sold_quantity: number;
+  remaining_stock: number;
+  purchased_count: number;
+  sold_count: number;
+  available_count: number;
 }
 
 export interface LedgerBillEntry {

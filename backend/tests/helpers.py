@@ -39,7 +39,6 @@ async def seed_parties_and_item_via_api(client: AsyncClient):
                 "name_ta": "கோழி",
                 "name_en": "Chicken",
                 "unit_type": "KG",
-                "minimum_stock": 50,
             },
         )
     ).json()
@@ -52,7 +51,6 @@ async def seed_item_db(
     name_en: str = "Chicken",
     available: float = 0,
     used: float = 0,
-    minimum: float = 50,
 ) -> Item:
     item = Item(
         name_ta="கோழி",
@@ -60,7 +58,6 @@ async def seed_item_db(
         unit_type=UnitType.KG,
         available_stock=available,
         used_stock=used,
-        minimum_stock=minimum,
     )
     db.add(item)
     await db.flush()

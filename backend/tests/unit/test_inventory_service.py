@@ -90,17 +90,3 @@ async def test_revert_purchase_and_sale(db_session: AsyncSession):
     await db_session.refresh(item)
     assert float(item.available_stock) == 45
     assert float(item.used_stock) == 15
-
-
-@pytest.mark.unit
-@pytest.mark.asyncio
-async def test_low_stock_alerts(db_session: AsyncSession):
-    low = await seed_item_db(db_session, name_en="Low", available=5, minimum=50)
-    await seed_item_db(db_session, name_en="Ok", available=100, minimum=50)
-    await db_session.commit()
-
-    alerts = await InventoryService.get_low_stock_alerts(db_session)
-    names = {a["item_name"] for a in alerts}
-    assert "Low" in names
-    assert "Ok" not in names
-    assert low.name_en == "Low"

@@ -18,7 +18,7 @@ from tests.helpers import seed_item_db, seed_party_db
 async def test_purchase_then_sale_updates_stock_and_balances(db_session: AsyncSession):
     supplier = await seed_party_db(db_session, name="Farm", party_type=PartyType.SUPPLIER, mobile="9111111111")
     customer = await seed_party_db(db_session, name="Shop", party_type=PartyType.CUSTOMER, mobile="9222222222")
-    item = await seed_item_db(db_session, available=0, minimum=10)
+    item = await seed_item_db(db_session, available=0)
     await db_session.flush()
 
     purchase = Purchase(

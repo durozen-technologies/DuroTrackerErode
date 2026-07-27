@@ -12,8 +12,6 @@ from app.models.expense import Expense
 from app.models.item import Item
 from app.models.party import Party
 from app.models.enums import PartyType
-from app.services.inventory_service import InventoryService
-from app.schemas import LowStockAlert
 
 router = APIRouter()
 
@@ -32,7 +30,6 @@ class DashboardStats(BaseModel):
     customer_outstanding: float
     supplier_outstanding: float
     inventory: List[InventoryStat]
-    low_stock_alerts: List[LowStockAlert]
     date_from: date
     date_to: date
 
@@ -109,8 +106,6 @@ async def get_dashboard_stats(
         )
         for item in items
     ]
-    alerts_raw = await InventoryService.get_low_stock_alerts(db)
-    low_stock_alerts = [LowStockAlert(**a) for a in alerts_raw]
 
     return DashboardStats(
         total_sales=sales_total,
@@ -120,7 +115,6 @@ async def get_dashboard_stats(
         customer_outstanding=customer_outstanding,
         supplier_outstanding=supplier_outstanding,
         inventory=inventory,
-        low_stock_alerts=low_stock_alerts,
         date_from=d_from,
         date_to=d_to,
     )

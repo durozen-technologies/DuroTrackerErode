@@ -17,7 +17,6 @@ class Item(Base, BaseModelMixin):
     
     available_stock: Mapped[float] = mapped_column(Numeric(10, 2), default=0.0)
     used_stock: Mapped[float] = mapped_column(Numeric(10, 2), default=0.0)
-    minimum_stock: Mapped[float] = mapped_column(Numeric(10, 2), default=0.0)
     
     purchase_items = relationship("PurchaseItem", back_populates="item")
     sale_items = relationship("SaleItem", back_populates="item")

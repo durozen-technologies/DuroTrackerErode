@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Save, Plus, Trash2, Truck } from 'lucide-react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Picker } from '@react-native-picker/picker';
-import client from '../api/client';
+import { fetchParties, fetchItems, createPurchase, updatePurchase, deletePurchase } from '../api/resources';
 
 type Line = {
   item_id: string;
@@ -43,11 +43,11 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
 
   const { data: parties } = useQuery({
     queryKey: ['parties', 'SUPPLIER'],
-    queryFn: async () => (await client.get('/parties/?party_type=SUPPLIER')).data,
+    queryFn: () => fetchParties('SUPPLIER'),
   });
   const { data: items } = useQuery({
     queryKey: ['items'],
-    queryFn: async () => (await client.get('/items/')).data,
+    queryFn: () => fetchItems(),
   });
 
   const itemMap = useMemo(() => {
@@ -76,12 +76,12 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
 
   const mutation = useMutation({
     mutationFn: (payload: any) => {
-      if (editData?.id) return client.put(`/purchases/${editData.id}`, payload);
-      return client.post('/purchases/', payload);
+      if (editData?.id) return updatePurchase(editData.id, payload);
+      return createPurchase(payload);
     },
-    onSuccess: (res) => {
+    onSuccess: (res: any) => {
       invalidate();
-      const alerts = res.data?.low_stock_alerts || [];
+      const alerts = res?.low_stock_alerts || [];
       if (alerts.length) {
         Alert.alert(
           'Saved — Low Stock',
@@ -99,7 +99,7 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => client.delete(`/purchases/${editData.id}`),
+    mutationFn: () => deletePurchase(editData.id),
     onSuccess: () => {
       invalidate();
       navigation.goBack();

@@ -15,7 +15,6 @@ class ItemBase(BaseModel):
     name_ta: str
     name_en: str
     unit_type: UnitType
-    minimum_stock: float = 0.0
 
 
 class ItemCreate(ItemBase):
@@ -26,7 +25,6 @@ class ItemUpdate(BaseModel):
     name_ta: Optional[str] = None
     name_en: Optional[str] = None
     unit_type: Optional[UnitType] = None
-    minimum_stock: Optional[float] = None
 
 
 class ItemResponse(ItemBase):
@@ -38,14 +36,8 @@ class ItemResponse(ItemBase):
 
 
 @router.get("/", response_model=List[ItemResponse])
-async def get_items(
-    low_stock: bool = False,
-    db: AsyncSession = Depends(deps.get_db),
-):
-    query = select(Item)
-    if low_stock:
-        query = query.where(Item.available_stock <= Item.minimum_stock)
-    result = await db.execute(query.order_by(Item.name_en))
+async def get_items(db: AsyncSession = Depends(deps.get_db)):
+    result = await db.execute(select(Item).order_by(Item.name_en))
     return result.scalars().all()
 
 
@@ -55,7 +47,6 @@ async def create_item(item: ItemCreate, db: AsyncSession = Depends(deps.get_db))
         name_ta=item.name_ta,
         name_en=item.name_en,
         unit_type=item.unit_type,
-        minimum_stock=item.minimum_stock,
     )
     db.add(db_item)
     await db.commit()

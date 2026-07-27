@@ -4,7 +4,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Save, User } from 'lucide-react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import client from '../api/client';
+import { createParty, updateParty } from '../api/resources';
 
 type PartyType = 'SUPPLIER' | 'CUSTOMER';
 
@@ -25,8 +25,8 @@ export default function NewPartyScreen({ navigation, route }: any) {
 
   const mutation = useMutation({
     mutationFn: (payload: any) => {
-      if (editData?.id) return client.put(`/parties/${editData.id}`, payload);
-      return client.post('/parties/', payload);
+      if (editData?.id) return updateParty(editData.id, payload);
+      return createParty(payload as any);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parties'] });

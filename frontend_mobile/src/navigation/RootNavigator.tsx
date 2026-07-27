@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { LayoutGrid, ShoppingCart, Tag, Users, Receipt } from 'lucide-react-native';
+import { LayoutGrid, ShoppingCart, Tag, Users, Receipt, Package } from 'lucide-react-native';
 
 import DashboardScreen from '../screens/DashboardScreen';
 import PartiesScreen from '../screens/PartiesScreen';
@@ -14,6 +14,7 @@ import ExpensesScreen from '../screens/ExpensesScreen';
 import ExpenseCategoriesScreen from '../screens/ExpenseCategoriesScreen';
 import ReportsScreen from '../screens/ReportsScreen';
 import ItemsScreen from '../screens/ItemsScreen';
+import InventoryScreen from '../screens/InventoryScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import PartyLedgerScreen from '../screens/PartyLedgerScreen';
 import RecordPaymentScreen from '../screens/RecordPaymentScreen';
@@ -48,6 +49,7 @@ function MainTabNavigator() {
             else if (route.name === 'Sales') activeColor = '#006269';
             else if (route.name === 'Parties') activeColor = '#D97706';
             else if (route.name === 'Expenses') activeColor = '#E11D48';
+            else if (route.name === 'Inventory') activeColor = '#006269';
           }
           const displayColor = focused ? activeColor : color;
           
@@ -107,6 +109,13 @@ function MainTabNavigator() {
         component={SalesScreen} 
         options={{
           tabBarIcon: ({ focused, color }) => <Tag color={focused ? '#006269' : color} size={20} />,
+        }}
+      />
+      <Tab.Screen
+        name="Inventory"
+        component={InventoryScreen}
+        options={{
+          tabBarIcon: ({ focused, color }) => <Package color={focused ? '#006269' : color} size={20} />,
         }}
       />
       <Tab.Screen 

@@ -16,7 +16,7 @@ async def test_reports_and_dashboard(client: AsyncClient):
             "party_id": supplier["id"],
             "cash_payment": 500,
             "upi_payment": 0,
-            "items": [{"item_id": item["id"], "quantity": 20, "rate": 100}],
+            "items": [{"item_id": item["id"], "quantity": 20, "count": 40, "rate": 100}],
         },
     )
     await client.post(
@@ -25,7 +25,7 @@ async def test_reports_and_dashboard(client: AsyncClient):
             "party_id": customer["id"],
             "cash_payment": 500,
             "upi_payment": 0,
-            "items": [{"item_id": item["id"], "quantity": 5, "rate": 150}],
+            "items": [{"item_id": item["id"], "quantity": 5, "count": 10, "rate": 150}],
         },
     )
 
@@ -47,6 +47,9 @@ async def test_reports_and_dashboard(client: AsyncClient):
     assert row["purchased_quantity"] == 20
     assert row["sold_quantity"] == 5
     assert row["available_stock"] == 15
+    assert row["purchased_count"] == 40
+    assert row["sold_count"] == 10
+    assert row["available_count"] == 30
 
     outstanding = await client.get("/api/reports/outstanding?party_type=SUPPLIER")
     assert outstanding.status_code == 200

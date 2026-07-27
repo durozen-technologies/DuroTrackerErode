@@ -3,6 +3,7 @@ import type {
   AggregatedReport,
   Bill,
   DashboardStats,
+  InventoryReportRow,
   Item,
   Party,
   PartyLedger,
@@ -39,11 +40,14 @@ export async function recordPayment(payload: {
 }
 
 export async function fetchItems(lowStock = false): Promise<Item[]> {
-  const q = lowStock ? '?low_stock=true' : '';
-  return (await client.get(`/items/${q}`)).data;
+  return (await client.get(lowStock ? '/items/?low_stock=true' : '/items/')).data;
 }
 
-export async function createItem(payload: Pick<Item, 'name_ta' | 'name_en' | 'unit_type' | 'minimum_stock'>) {
+export async function fetchInventoryReport(): Promise<InventoryReportRow[]> {
+  return (await client.get('/reports/inventory')).data;
+}
+
+export async function createItem(payload: Pick<Item, 'name_ta' | 'name_en' | 'unit_type'>) {
   return (await client.post('/items/', payload)).data as Item;
 }
 
