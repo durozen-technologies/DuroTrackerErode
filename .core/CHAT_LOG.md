@@ -524,3 +524,6 @@ Agent: Updated root `.gitignore` to comprehensively cover all local development 
 ### [2026-08-04 10:13:00] Fixed GitHub Action OOM Crash
 - Identified Node.js exit 1 issue as an Out of Memory error due to GitHub runner's 7GB limit.
 - Updated workflow memory allocations.
+
+### [2026-08-04 10:37:31] Fixed GitHub Action Node Crash
+- Root cause was a missing trailing newline in gradle.properties, corrupting JSON parsing when JVM args were appended. Fixed in workflow.

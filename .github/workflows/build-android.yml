@@ -58,6 +58,7 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
         run: |
+          echo "" >> gradle.properties
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> gradle.properties
           echo "org.gradle.workers.max=2" >> gradle.properties
           chmod +x gradlew

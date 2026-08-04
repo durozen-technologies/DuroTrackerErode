@@ -372,3 +372,8 @@
 ### [2026-08-04 10:13:00] Fixed GitHub Action OOM Crash
 - Reduced NODE_OPTIONS max-old-space-size to 2048 and Gradle max heap to 2048m in build-android.yml to prevent Ubuntu runner from running out of 7GB RAM.
 - Committed and pushed the changes to trigger a new build.
+
+### [2026-08-04 10:37:31] Fixed GitHub Action Missing Newline Issue
+- Discovered that 'npx expo prebuild' generated gradle.properties without a trailing newline.
+- This caused 'echo' appending to corrupt the Expo watched directories array, leading to a Node CLI argument crash.
+- Added 'echo' newline to build-android.yml before appending JVM args.
