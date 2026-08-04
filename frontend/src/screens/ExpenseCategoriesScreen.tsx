@@ -27,6 +27,7 @@ export default function ExpenseCategoriesScreen() {
       createExpenseCategory(newCat.name, newCat.name, newCat.sortOrder, newCat.isActive),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenseCategories'] });
+      queryClient.invalidateQueries({ queryKey: ['activeExpenseCategories'] });
       closeModal();
     },
     onError: (err: any) => {
@@ -38,6 +39,7 @@ export default function ExpenseCategoriesScreen() {
     mutationFn: (updateData: any) => updateExpenseCategory(updateData.id, updateData.updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenseCategories'] });
+      queryClient.invalidateQueries({ queryKey: ['activeExpenseCategories'] });
       closeModal();
     },
     onError: (err: any) => {

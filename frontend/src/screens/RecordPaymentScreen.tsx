@@ -53,6 +53,7 @@ export default function RecordPaymentScreen({ navigation, route }: any) {
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
       queryClient.invalidateQueries({ queryKey: ['sales'] });
       queryClient.invalidateQueries({ queryKey: ['purchases'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
       const bills = result.bill_allocations?.length || 0;
       Alert.alert(
         'Payment recorded',
@@ -100,9 +101,10 @@ export default function RecordPaymentScreen({ navigation, route }: any) {
 
       <KeyboardAwareScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 40, flexGrow: 1 }}
         enableOnAndroid
         extraScrollHeight={24}
+        keyboardShouldPersistTaps="handled"
       >
         <View className="bg-surface border border-border rounded-xl p-4 mb-4">
           <Text className="text-xs text-content-secondary mb-1">Total Due</Text>
@@ -124,10 +126,11 @@ export default function RecordPaymentScreen({ navigation, route }: any) {
               value={new Date(date)}
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={(_e, selected) => {
+              onValueChange={(_e, selected) => {
                 setShowDatePicker(Platform.OS === 'ios');
                 if (selected) setDate(toYMD(selected));
               }}
+              onDismiss={() => setShowDatePicker(false)}
             />
           )}
 

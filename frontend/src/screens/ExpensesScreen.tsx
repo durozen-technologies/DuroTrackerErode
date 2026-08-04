@@ -31,6 +31,7 @@ export default function ExpensesScreen() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expensesHistory'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
       closeModal();
       Alert.alert('Success', 'Expense recorded successfully');
     },
@@ -44,6 +45,7 @@ export default function ExpensesScreen() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expensesHistory'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
       closeModal();
       Alert.alert('Success', 'Expense updated successfully');
     },
@@ -57,6 +59,7 @@ export default function ExpensesScreen() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expensesHistory'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
       closeModal();
       Alert.alert('Success', 'Expense deleted successfully');
     },

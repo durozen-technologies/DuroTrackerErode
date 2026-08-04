@@ -352,3 +352,19 @@
 - [2026-08-01 09:32:22] Configured the frontend IP by creating `frontend/.env` file containing the machine's local IPv4 address as `EXPO_PUBLIC_API_URL`. This allows mobile devices running Expo Go to connect to the local backend API server.
 
 - [2026-08-01 09:37:54] Fixed React Native SDK version mismatches in the frontend by running 'npm install react-native@0.86.2 react-native-pager-view@8.0.2 react-native-screens@~4.26.0' to ensure compatibility with Expo SDK 57.
+
+- [2026-08-01 09:51:05] Added a GitHub Actions workflow (`.github/workflows/build-android.yml`) to automatically build a Development (Debug) APK using `assembleDebug`. This APK acts as a custom dev client, resolving the "Cannot find native module 'ExpoPrint'" error for local development. Pushed to remote to trigger the action.
+
+- [2026-08-01 10:13:36] Fixed 500 error in backend Reports API caused by missing `purchase_items` table. The data models had been updated in the Python code on July 24, but the corresponding Alembic migration was missing. Generated the missing migration using `alembic revision --autogenerate` and applied it to the database with `alembic upgrade head`. Pushed the migration to the remote repository.
+
+- [2026-08-01 10:23:51] Configured the backend to connect to a newly created `Duro_Erode` local PostgreSQL database by generating a `backend/.env` file with `POSTGRES_DB="Duro_Erode"`. Ran `alembic upgrade head` to populate this new database with all tables from scratch.
+
+- **[2026-08-01 10:15:30]**: Fixed deprecated `onChange` props in `@react-native-community/datetimepicker` in frontend screens.
+- **[2026-08-01 11:31:00]**: Checked `KeyboardAwareScrollView` across the project. Added missing `extraScrollHeight={120}` to `NewPurchaseScreen` and `NewSaleScreen` to prevent inputs from hiding behind the Save button. Added missing `keyboardShouldPersistTaps="handled"` to `RecordPaymentScreen` to prevent double-tap issues when the keyboard is open.
+- **[2026-08-01 11:33:00]**: Fixed deep Android keyboard scrolling glitches by adding `"softwareKeyboardLayoutMode": "pan"` to the Expo `app.json` configuration, and added `flexGrow: 1` to `contentContainerStyle` across all screens to ensure correct rendering.
+- **[2026-08-01 11:55:00]**: Removed hardcoded database credentials (`postgres`, `root`) from `docker-compose.yml` and replaced them with Dokploy-friendly environment variables (`${POSTGRES_USER}`, etc.). Also removed the hardcoded production API URL from `.github/workflows/build-android.yml` and replaced it with a GitHub Secret (`${{ secrets.EXPO_PUBLIC_API_URL }}`).
+- **[2026-08-01 13:14:00]**: Implemented comprehensive React Query cache invalidations across the frontend (`RecordPaymentScreen`, `NewSaleScreen`, `NewPurchaseScreen`, `ExpensesScreen`, `ExpenseCategoriesScreen`, `ItemsScreen`, `NewPartyScreen`) to ensure that all UI elements, reports, ledgers, and low stock alerts dynamically and instantly update whenever a transaction occurs.
+
+- [2026-08-01 10:44:45] Created Docker configuration files (`backend/Dockerfile`, `backend/start.sh`, and `docker-compose.yml`) to deploy the backend API and PostgreSQL database together. The frontend is not containerized since it is an Android mobile app (APK).
+
+- [2026-08-01 10:51:04] Removed hardcoded host port mappings (`8000:8000` and `5432:5432`) from `docker-compose.yml` because they caused a 'port already allocated' error on the deployment server. Dokploy handles routing dynamically, so host bindings are not required. Pushed the fix to the repository.

@@ -64,6 +64,8 @@ export default function ItemsScreen({ navigation, route }: any) {
       queryClient.invalidateQueries({ queryKey: ['items'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-report'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ['lowStock'] });
       setModalOpen(false);
       setEditItem(null);
     },

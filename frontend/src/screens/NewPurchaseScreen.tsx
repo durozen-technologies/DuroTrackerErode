@@ -72,6 +72,12 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
     queryClient.invalidateQueries({ queryKey: ['items'] });
     queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
     queryClient.invalidateQueries({ queryKey: ['parties'] });
+    queryClient.invalidateQueries({ queryKey: ['reports'] });
+    queryClient.invalidateQueries({ queryKey: ['inventory-report'] });
+    queryClient.invalidateQueries({ queryKey: ['lowStock'] });
+    if (partyId) {
+      queryClient.invalidateQueries({ queryKey: ['partyLedger', partyId] });
+    }
   };
 
   const mutation = useMutation({
@@ -163,8 +169,9 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
 
       <KeyboardAwareScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 120, flexGrow: 1 }}
         enableOnAndroid
+        extraScrollHeight={120}
         keyboardShouldPersistTaps="handled"
       >
         <Text className="text-xs font-medium text-gray-700 mb-1">Date</Text>
@@ -179,10 +186,11 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
             value={new Date(date)}
             mode="date"
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={(_, d) => {
+            onValueChange={(_, d) => {
               setShowDatePicker(Platform.OS === 'ios');
               if (d) setDate(d.toISOString().split('T')[0]);
             }}
+            onDismiss={() => setShowDatePicker(false)}
           />
         )}
 

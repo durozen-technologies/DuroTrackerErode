@@ -30,6 +30,7 @@ export default function NewPartyScreen({ navigation, route }: any) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parties'] });
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
       if (editData?.id) {
         queryClient.invalidateQueries({ queryKey: ['partyLedger', editData.id] });
       }
@@ -81,7 +82,7 @@ export default function NewPartyScreen({ navigation, route }: any) {
 
       <KeyboardAwareScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 100, flexGrow: 1 }}
         enableOnAndroid
         extraScrollHeight={120}
         keyboardShouldPersistTaps="handled"

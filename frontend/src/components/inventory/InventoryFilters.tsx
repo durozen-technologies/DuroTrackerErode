@@ -214,13 +214,14 @@ export default function InventoryFilters({
               }
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={(_e, selected) => {
+              onValueChange={(_e, selected) => {
                 setPicking(Platform.OS === 'ios' ? picking : null);
                 if (!selected) return;
                 const ymd = toYMD(selected);
                 if (picking === 'from') onChange({ ...filters, dateFrom: ymd });
                 else onChange({ ...filters, dateTo: ymd });
               }}
+              onDismiss={() => setPicking(null)}
             />
           )}
         </View>
