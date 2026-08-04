@@ -51,9 +51,9 @@ jobs:
       - name: Build Debug APK with Gradle
         working-directory: ./frontend/android
         env:
-          NODE_OPTIONS: "--max-old-space-size=4096"
+          NODE_OPTIONS: "--max-old-space-size=2048"
         run: |
-          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> gradle.properties
+          echo "org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> gradle.properties
           echo "org.gradle.workers.max=2" >> gradle.properties
           chmod +x gradlew
           ./gradlew :app:assembleDebug --no-daemon
