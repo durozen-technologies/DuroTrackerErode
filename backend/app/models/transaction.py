@@ -14,6 +14,8 @@ class PaymentTransaction(Base, BaseModelMixin):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, index=True, default=uuid7)
     party_id: Mapped[UUID] = mapped_column(ForeignKey("parties.id"), nullable=False, index=True)
+    sale_id: Mapped[UUID | None] = mapped_column(ForeignKey("sales.id", ondelete="CASCADE"), nullable=True, index=True)
+    purchase_id: Mapped[UUID | None] = mapped_column(ForeignKey("purchases.id", ondelete="CASCADE"), nullable=True, index=True)
     
     date: Mapped[date] = mapped_column(Date, nullable=False)
     

@@ -137,25 +137,25 @@ export default function ExpensesScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-canvas">
       {/* Top App Bar */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+      <View className="flex-row items-center justify-between px-4 py-3 bg-surface border-b border-border">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => navigation.canGoBack() && navigation.goBack()} className="mr-3">
             <ArrowLeft color="#111827" size={24} />
           </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-900">Expenses</Text>
+          <Text className="text-xl font-bold text-content-primary">Expenses</Text>
         </View>
         <TouchableOpacity 
           onPress={() => navigation.navigate('ExpenseCategories' as never)}
           className="bg-gray-100 px-3 py-1.5 rounded-full"
         >
-          <Text className="text-sm font-semibold text-gray-700">Categories</Text>
+          <Text className="text-sm font-semibold text-content-secondary">Categories</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView className="flex-1 p-4">
-        <Text className="text-sm font-bold text-gray-600 mb-3 uppercase tracking-wider">Record New Expense</Text>
+        <Text className="text-sm font-bold text-content-secondary mb-3 uppercase tracking-wider">Record New Expense</Text>
         
         {isLoadingCategories ? (
           <ActivityIndicator size="small" color="#006269" className="mb-6" />
@@ -165,30 +165,30 @@ export default function ExpensesScreen() {
               <TouchableOpacity 
                 key={cat.id} 
                 onPress={() => openExpenseModal(cat)}
-                className="bg-white p-4 rounded-xl border border-gray-200 mb-3 flex-row items-center justify-between shadow-sm"
+                className="bg-surface p-4 rounded-xl border border-border mb-3 flex-row items-center justify-between shadow-sm"
               >
                 <View className="flex-row items-center">
                   <View className="w-10 h-10 bg-green-50 rounded-full items-center justify-center mr-3">
                     <Receipt color="#006269" size={20} />
                   </View>
                   <View>
-                    <Text className="text-base font-bold text-gray-900">{cat.name_en}</Text>
-                    <Text className="text-xs text-gray-500 mt-0.5">Tap to record</Text>
+                    <Text className="text-base font-bold text-content-primary">{cat.name_en}</Text>
+                    <Text className="text-xs text-content-tertiary mt-0.5">Tap to record</Text>
                   </View>
                 </View>
                 <ChevronRight color="#9ca3af" size={20} />
               </TouchableOpacity>
             ))}
             {categories?.length === 0 && (
-              <View className="bg-white p-6 rounded-xl border border-gray-200 items-center">
-                <Text className="text-gray-500 text-center">No active categories found.</Text>
-                <Text className="text-gray-500 text-center mt-1">Please ask admin to create categories.</Text>
+              <View className="bg-surface p-6 rounded-xl border border-border items-center">
+                <Text className="text-content-tertiary text-center">No active categories found.</Text>
+                <Text className="text-content-tertiary text-center mt-1">Please ask admin to create categories.</Text>
               </View>
             )}
           </View>
         )}
 
-        <Text className="text-sm font-bold text-gray-600 mb-3 uppercase tracking-wider">Recent History</Text>
+        <Text className="text-sm font-bold text-content-secondary mb-3 uppercase tracking-wider">Recent History</Text>
         
         {isLoadingHistory ? (
           <ActivityIndicator size="small" color="#006269" />
@@ -202,27 +202,27 @@ export default function ExpensesScreen() {
                   onPress={() => {
                     if (cat) openExpenseModal(cat, entry);
                   }}
-                  className="bg-white p-4 rounded-xl border border-gray-200 mb-3 shadow-sm"
+                  className="bg-surface p-4 rounded-xl border border-border mb-3 shadow-sm"
                 >
                   <View className="flex-row justify-between items-start mb-2">
-                    <Text className="text-base font-bold text-gray-900">{entry.expense_name}</Text>
+                    <Text className="text-base font-bold text-content-primary">{entry.expense_name}</Text>
                     <Text className="text-base font-bold text-red-600">₹{entry.total_amount.toLocaleString()}</Text>
                   </View>
                   <View className="flex-row justify-between items-center mb-1">
-                    <Text className="text-xs text-gray-500">
+                    <Text className="text-xs text-content-tertiary">
                       Cash: ₹{entry.cash_amount.toLocaleString()} | UPI: ₹{entry.upi_amount.toLocaleString()}
                     </Text>
                   </View>
                   <Text className="text-xs text-gray-400 mb-1">{formatDate(entry.spent_at)}</Text>
                   {entry.note ? (
-                    <Text className="text-sm text-gray-600 mt-2 italic bg-gray-50 p-2 rounded">{entry.note}</Text>
+                    <Text className="text-sm text-content-secondary mt-2 italic bg-canvas p-2 rounded">{entry.note}</Text>
                   ) : null}
                 </TouchableOpacity>
               );
             })}
             {history?.length === 0 && (
               <View className="p-4 items-center">
-                <Text className="text-gray-500">No recent expenses.</Text>
+                <Text className="text-content-tertiary">No recent expenses.</Text>
               </View>
             )}
           </View>
@@ -235,15 +235,15 @@ export default function ExpensesScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           className="flex-1 justify-center bg-black/50 p-4"
         >
-          <View className="bg-white rounded-2xl p-6">
-            <Text className="text-xl font-bold text-gray-900 mb-2 text-center">
+          <View className="bg-surface rounded-2xl p-6">
+            <Text className="text-xl font-bold text-content-primary mb-2 text-center">
               {editExpense ? 'Edit' : 'Record'} {selectedCategory?.name_en}
             </Text>
             
             <View className="mb-4 mt-4">
-              <Text className="text-sm font-semibold text-gray-700 mb-2">Cash Amount (₹)</Text>
-              <TextInput 
-                className="bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-base"
+              <Text className="text-sm font-semibold text-content-secondary mb-2">Cash Amount (₹)</Text>
+              <TextInput placeholderTextColor="#849CA5" 
+                className="bg-canvas border border-border rounded-lg px-4 py-3 text-base text-content-primary"
                 placeholder="0"
                 keyboardType="decimal-pad"
                 value={cashAmount}
@@ -252,9 +252,9 @@ export default function ExpensesScreen() {
             </View>
 
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-700 mb-2">UPI Amount (₹)</Text>
-              <TextInput 
-                className="bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-base"
+              <Text className="text-sm font-semibold text-content-secondary mb-2">UPI Amount (₹)</Text>
+              <TextInput placeholderTextColor="#849CA5" 
+                className="bg-canvas border border-border rounded-lg px-4 py-3 text-base text-content-primary"
                 placeholder="0"
                 keyboardType="decimal-pad"
                 value={upiAmount}
@@ -263,9 +263,9 @@ export default function ExpensesScreen() {
             </View>
 
             <View className="mb-6">
-              <Text className="text-sm font-semibold text-gray-700 mb-2">Note (Optional)</Text>
-              <TextInput 
-                className="bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-base"
+              <Text className="text-sm font-semibold text-content-secondary mb-2">Note (Optional)</Text>
+              <TextInput placeholderTextColor="#849CA5" 
+                className="bg-canvas border border-border rounded-lg px-4 py-3 text-base text-content-primary"
                 placeholder="Add a remark..."
                 value={note}
                 onChangeText={setNote}
@@ -273,8 +273,8 @@ export default function ExpensesScreen() {
             </View>
 
             <View className="bg-green-50 p-4 rounded-lg mb-6 border border-green-200 flex-row justify-between items-center">
-              <Text className="font-bold text-gray-700 uppercase text-xs">Total Expense</Text>
-              <Text className="text-xl font-bold text-[#006269]">
+              <Text className="font-bold text-content-secondary uppercase text-xs">Total Expense</Text>
+              <Text className="text-xl font-bold text-brand">
                 ₹{((parseFloat(cashAmount) || 0) + (parseFloat(upiAmount) || 0)).toLocaleString()}
               </Text>
             </View>
@@ -290,11 +290,11 @@ export default function ExpensesScreen() {
                 </TouchableOpacity>
               ) : null}
               <TouchableOpacity onPress={closeModal} className={`${editExpense ? 'w-[25%]' : 'flex-1'} py-3 bg-gray-100 rounded-lg items-center justify-center`}>
-                <Text className="font-semibold text-gray-700">Cancel</Text>
+                <Text className="font-semibold text-content-secondary">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 onPress={handleSaveExpense} 
-                className={`${editExpense ? 'w-[50%]' : 'flex-1'} py-3 bg-[#006269] rounded-lg items-center justify-center`}
+                className={`${editExpense ? 'w-[50%]' : 'flex-1'} py-3 bg-brand rounded-lg items-center justify-center`}
                 disabled={createExpenseMutation.isPending || updateExpenseMutation.isPending || deleteExpenseMutation.isPending}
               >
                 {(createExpenseMutation.isPending || updateExpenseMutation.isPending) ? (

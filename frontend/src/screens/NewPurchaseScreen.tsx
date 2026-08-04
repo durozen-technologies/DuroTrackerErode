@@ -33,11 +33,11 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
   const [lines, setLines] = useState<Line[]>(
     editData?.items?.length
       ? editData.items.map((i: any) => ({
-          item_id: i.item_id,
-          quantity: String(i.quantity ?? ''),
-          count: i.count != null ? String(i.count) : '',
-          rate: String(i.rate ?? ''),
-        }))
+        item_id: i.item_id,
+        quantity: String(i.quantity ?? ''),
+        count: i.count != null ? String(i.count) : '',
+        rate: String(i.rate ?? ''),
+      }))
       : [emptyLine()]
   );
 
@@ -145,13 +145,13 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="px-4 py-3 bg-white border-b border-gray-100 flex-row items-center justify-between">
+    <SafeAreaView className="flex-1 bg-canvas">
+      <View className="px-4 py-3 bg-surface border-b border-border flex-row items-center justify-between">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
             <ArrowLeft size={24} color="#111827" />
           </TouchableOpacity>
-          <Text className="text-lg font-bold text-gray-900">{editData ? 'Edit Purchase' : 'New Purchase'}</Text>
+          <Text className="text-lg font-bold text-content-primary">{editData ? 'Edit Purchase' : 'New Purchase'}</Text>
         </View>
         {editData && (
           <TouchableOpacity
@@ -174,10 +174,10 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
         extraScrollHeight={120}
         keyboardShouldPersistTaps="handled"
       >
-        <Text className="text-xs font-medium text-gray-700 mb-1">Date</Text>
+        <Text className="text-xs font-medium text-content-secondary mb-1">Date</Text>
         <TouchableOpacity
           onPress={() => setShowDatePicker(true)}
-          className="bg-white border border-gray-300 rounded-md px-3 py-2.5 mb-3"
+          className="bg-surface border border-border rounded-md px-3 py-2.5 mb-3"
         >
           <Text>{date}</Text>
         </TouchableOpacity>
@@ -194,9 +194,9 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
           />
         )}
 
-        <Text className="text-xs font-medium text-gray-700 mb-1">Purchaser *</Text>
-        <View className="bg-white border border-gray-300 rounded-md mb-4">
-          <Picker selectedValue={partyId} onValueChange={setPartyId}>
+        <Text className="text-xs font-medium text-content-secondary mb-1">Purchaser *</Text>
+        <View className="bg-surface border border-border rounded-md mb-4 justify-center" style={{ height: 50 }}>
+          <Picker selectedValue={partyId} onValueChange={setPartyId} style={{ height: 50, width: '100%', color: '#111827' }} dropdownIconColor="#111827">
             <Picker.Item label="Select purchaser" value="" />
             {(parties || []).map((p: any) => (
               <Picker.Item key={p.id} label={p.name} value={p.id} />
@@ -206,27 +206,27 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
 
         <View className="flex-row items-center mb-2">
           <Truck color="#006269" size={18} />
-          <Text className="text-sm font-semibold text-[#006269] ml-2">Logistics (optional)</Text>
+          <Text className="text-sm font-semibold text-brand ml-2">Logistics (optional)</Text>
         </View>
-        <TextInput
+        <TextInput placeholderTextColor="#849CA5"
           placeholder="Driver name"
           value={driverName}
           onChangeText={setDriverName}
-          className="bg-white border border-gray-300 rounded-md px-3 py-2.5 mb-2"
+          className="bg-surface border border-border rounded-md px-3 py-2.5 mb-2 text-content-primary"
         />
-        <TextInput
+        <TextInput placeholderTextColor="#849CA5"
           placeholder="Vehicle number"
           value={vehicleNumber}
           onChangeText={setVehicleNumber}
           autoCapitalize="characters"
-          className="bg-white border border-gray-300 rounded-md px-3 py-2.5 mb-4"
+          className="bg-surface border border-border rounded-md px-3 py-2.5 mb-4 text-content-primary"
         />
 
         <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-sm font-semibold text-[#006269]">Items</Text>
+          <Text className="text-sm font-semibold text-brand">Items</Text>
           <TouchableOpacity onPress={() => setLines((p) => [...p, emptyLine()])} className="flex-row items-center">
             <Plus color="#006269" size={16} />
-            <Text className="text-[#006269] text-sm ml-1">Add line</Text>
+            <Text className="text-brand text-sm ml-1">Add line</Text>
           </TouchableOpacity>
         </View>
 
@@ -234,17 +234,17 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
           const item = itemMap[line.item_id];
           const isKg = item?.unit_type === 'KG';
           return (
-            <View key={idx} className="bg-white border border-gray-200 rounded-xl p-3 mb-3">
+            <View key={idx} className="bg-surface border border-border rounded-xl p-3 mb-3">
               <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-xs font-semibold text-gray-500">Line {idx + 1}</Text>
+                <Text className="text-xs font-semibold text-content-tertiary">Line {idx + 1}</Text>
                 {lines.length > 1 && (
                   <TouchableOpacity onPress={() => setLines((p) => p.filter((_, i) => i !== idx))}>
                     <Trash2 color="#dc2626" size={16} />
                   </TouchableOpacity>
                 )}
               </View>
-              <View className="border border-gray-300 rounded-md mb-2">
-                <Picker selectedValue={line.item_id} onValueChange={(v) => updateLine(idx, { item_id: v })}>
+              <View className="border border-border rounded-md mb-2 justify-center" style={{ height: 50 }}>
+                <Picker selectedValue={line.item_id} onValueChange={(v) => updateLine(idx, { item_id: v })} style={{ height: 50, width: '100%', color: '#111827' }} dropdownIconColor="#111827">
                   <Picker.Item label="Select item" value="" />
                   {(items || []).map((it: any) => (
                     <Picker.Item key={it.id} label={`${it.name_en} (${it.unit_type})`} value={it.id} />
@@ -253,78 +253,78 @@ export default function NewPurchaseScreen({ navigation, route }: any) {
               </View>
               <View className="flex-row gap-2">
                 <View className="flex-1">
-                  <Text className="text-[10px] text-gray-500 mb-1">{isKg ? 'Quantity (Kg)' : 'Quantity (Unit)'}</Text>
-                  <TextInput
+                  <Text className="text-[10px] text-content-tertiary mb-1">{isKg ? 'Quantity (Kg)' : 'Quantity (Unit)'}</Text>
+                  <TextInput placeholderTextColor="#849CA5"
                     keyboardType="decimal-pad"
                     value={line.quantity}
                     onChangeText={(v) => updateLine(idx, { quantity: v })}
-                    className="border border-gray-300 rounded-md px-2 py-2"
+                    className="border border-border rounded-md px-2 py-2 text-content-primary"
                   />
                 </View>
                 {isKg && (
                   <View className="flex-1">
-                    <Text className="text-[10px] text-gray-500 mb-1">Total Count</Text>
-                    <TextInput
+                    <Text className="text-[10px] text-content-tertiary mb-1">Total Count</Text>
+                    <TextInput placeholderTextColor="#849CA5"
                       keyboardType="number-pad"
                       value={line.count}
                       onChangeText={(v) => updateLine(idx, { count: v })}
-                      className="border border-gray-300 rounded-md px-2 py-2"
+                      className="border border-border rounded-md px-2 py-2 text-content-primary"
                     />
                   </View>
                 )}
                 <View className="flex-1">
-                  <Text className="text-[10px] text-gray-500 mb-1">Rate</Text>
-                  <TextInput
+                  <Text className="text-[10px] text-content-tertiary mb-1">Rate</Text>
+                  <TextInput placeholderTextColor="#849CA5"
                     keyboardType="decimal-pad"
                     value={line.rate}
                     onChangeText={(v) => updateLine(idx, { rate: v })}
-                    className="border border-gray-300 rounded-md px-2 py-2"
+                    className="border border-border rounded-md px-2 py-2 text-content-primary"
                   />
                 </View>
               </View>
-              <Text className="text-right text-sm font-semibold text-gray-800 mt-2">
+              <Text className="text-right text-sm font-semibold text-content-primary mt-2">
                 ₹{lineTotals[idx].toLocaleString()}
               </Text>
             </View>
           );
         })}
 
-        <View className="bg-white border border-gray-200 rounded-xl p-4 mb-3">
-          <Text className="text-sm font-semibold text-[#006269] mb-3">Payment</Text>
-          <Text className="text-xs text-gray-500 mb-1">Cash Paid</Text>
-          <TextInput
+        <View className="bg-surface border border-border rounded-xl p-4 mb-3">
+          <Text className="text-sm font-semibold text-brand mb-3">Payment</Text>
+          <Text className="text-xs text-content-tertiary mb-1">Cash Paid</Text>
+          <TextInput placeholderTextColor="#849CA5"
             keyboardType="decimal-pad"
             value={cash}
             onChangeText={setCash}
-            className="border border-gray-300 rounded-md px-3 py-2 mb-2"
+            className="border border-border rounded-md px-3 py-2 mb-2 text-content-primary"
           />
-          <Text className="text-xs text-gray-500 mb-1">UPI Paid</Text>
-          <TextInput
+          <Text className="text-xs text-content-tertiary mb-1">UPI Paid</Text>
+          <TextInput placeholderTextColor="#849CA5"
             keyboardType="decimal-pad"
             value={upi}
             onChangeText={setUpi}
-            className="border border-gray-300 rounded-md px-3 py-2 mb-3"
+            className="border border-border rounded-md px-3 py-2 mb-3 text-content-primary"
           />
           <View className="flex-row justify-between mb-1">
-            <Text className="text-gray-600">Total Amount</Text>
+            <Text className="text-content-secondary">Total Amount</Text>
             <Text className="font-bold">₹{totalAmount.toLocaleString()}</Text>
           </View>
           <View className="flex-row justify-between mb-1">
-            <Text className="text-gray-600">Total Paid</Text>
+            <Text className="text-content-secondary">Total Paid</Text>
             <Text className="font-bold">₹{totalPaid.toLocaleString()}</Text>
           </View>
           <View className="flex-row justify-between">
-            <Text className="text-gray-600">Balance</Text>
-            <Text className="font-bold text-[#006269]">₹{balance.toLocaleString()}</Text>
+            <Text className="text-content-secondary">Balance</Text>
+            <Text className="font-bold text-brand">₹{balance.toLocaleString()}</Text>
           </View>
         </View>
       </KeyboardAwareScrollView>
 
-      <View className="absolute bottom-0 w-full bg-white border-t border-gray-200 p-4">
+      <View className="absolute bottom-0 w-full bg-surface border-t border-border p-4">
         <TouchableOpacity
           onPress={handleSave}
           disabled={mutation.isPending}
-          className="bg-[#006269] py-3 rounded-md flex-row items-center justify-center"
+          className="bg-brand py-3 rounded-md flex-row items-center justify-center"
         >
           <Save color="white" size={16} />
           <Text className="text-white font-semibold ml-2">

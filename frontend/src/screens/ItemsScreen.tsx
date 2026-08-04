@@ -166,20 +166,20 @@ export default function ItemsScreen({ navigation, route }: any) {
               </TouchableOpacity>
             </View>
             <Text className="text-xs text-content-secondary mb-1">Name (Tamil) *</Text>
-            <TextInput
+            <TextInput placeholderTextColor="#849CA5"
               value={form.name_ta}
               onChangeText={(v) => setForm({ ...form, name_ta: v })}
               className="border border-border rounded-md px-3 py-2 mb-3 bg-canvas text-content-primary"
             />
             <Text className="text-xs text-content-secondary mb-1">Name (English) *</Text>
-            <TextInput
+            <TextInput placeholderTextColor="#849CA5"
               value={form.name_en}
               onChangeText={(v) => setForm({ ...form, name_en: v })}
               className="border border-border rounded-md px-3 py-2 mb-3 bg-canvas text-content-primary"
             />
             <Text className="text-xs text-content-secondary mb-1">Unit Type</Text>
-            <View className="border border-border rounded-md mb-4 bg-canvas">
-              <Picker selectedValue={form.unit_type} onValueChange={(v) => setForm({ ...form, unit_type: v })}>
+            <View className="border border-border rounded-md mb-4 bg-canvas justify-center" style={{ height: 50 }}>
+              <Picker selectedValue={form.unit_type} onValueChange={(v) => setForm({ ...form, unit_type: v })} style={{ height: 50, width: '100%', color: '#111827' }} dropdownIconColor="#111827">
                 <Picker.Item label="Kg" value="KG" />
                 <Picker.Item label="Unit" value="UNIT" />
               </Picker>

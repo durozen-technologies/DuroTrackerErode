@@ -135,7 +135,7 @@ export default function RecordPaymentScreen({ navigation, route }: any) {
           )}
 
           <Text className="text-xs text-content-secondary mb-1">{cashLabel}</Text>
-          <TextInput
+          <TextInput placeholderTextColor="#849CA5"
             keyboardType="decimal-pad"
             value={cash}
             onChangeText={setCash}
@@ -145,7 +145,7 @@ export default function RecordPaymentScreen({ navigation, route }: any) {
           />
 
           <Text className="text-xs text-content-secondary mb-1">{upiLabel}</Text>
-          <TextInput
+          <TextInput placeholderTextColor="#849CA5"
             keyboardType="decimal-pad"
             value={upi}
             onChangeText={setUpi}

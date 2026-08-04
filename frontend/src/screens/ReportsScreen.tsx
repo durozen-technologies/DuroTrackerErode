@@ -140,13 +140,13 @@ export default function ReportsScreen({ navigation }: any) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="px-4 py-3 bg-white border-b border-gray-200 flex-row items-center justify-between">
+    <SafeAreaView className="flex-1 bg-canvas">
+      <View className="px-4 py-3 bg-surface border-b border-border flex-row items-center justify-between">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3" accessibilityRole="button" accessibilityLabel="Go back">
             <ArrowLeft size={22} color="#111827" />
           </TouchableOpacity>
-          <Text className="text-lg font-bold text-gray-900">Reports</Text>
+          <Text className="text-lg font-bold text-content-primary">Reports</Text>
         </View>
         <TouchableOpacity
           onPress={handleExport}
@@ -154,7 +154,7 @@ export default function ReportsScreen({ navigation }: any) {
           accessibilityRole="button"
           accessibilityLabel="Export PDF"
           className={`flex-row items-center px-3 py-1.5 rounded-lg border ${
-            exportDisabled ? 'border-gray-200 bg-gray-50' : 'border-gray-900 bg-gray-900'
+            exportDisabled ? 'border-border bg-canvas' : 'border-gray-900 bg-gray-900'
           }`}
         >
           {exporting ? (
@@ -168,57 +168,59 @@ export default function ReportsScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="bg-white border-b border-gray-200 px-2">
-        {tabs.map((t) => (
-          <TouchableOpacity
-            key={t}
-            onPress={() => {
-              setActiveTab(t);
-              setGroupBy('date');
-            }}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: activeTab === t }}
-            className={`px-4 py-3 ${activeTab === t ? 'border-b-2 border-[#006269]' : ''}`}
-          >
-            <Text className={`text-sm font-semibold ${activeTab === t ? 'text-[#006269]' : 'text-gray-500'}`}>{t}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <View className="bg-surface border-b border-border">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-2">
+          {tabs.map((t) => (
+            <TouchableOpacity
+              key={t}
+              onPress={() => {
+                setActiveTab(t);
+                setGroupBy('date');
+              }}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: activeTab === t }}
+              className={`px-4 py-3 ${activeTab === t ? 'border-b-2 border-brand' : ''}`}
+            >
+              <Text className={`text-sm font-semibold ${activeTab === t ? 'text-brand' : 'text-content-tertiary'}`}>{t}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       {showDateFilters && (
-        <View className="px-4 py-3 bg-white border-b border-gray-100 flex-row gap-2">
+        <View className="px-4 py-3 bg-surface border-b border-border flex-row gap-2">
           <View className="flex-1">
-            <Text className="text-[10px] text-gray-500 mb-1">From</Text>
-            <TextInput
+            <Text className="text-[10px] text-content-tertiary mb-1">From</Text>
+            <TextInput placeholderTextColor="#849CA5"
               value={dateFrom}
               onChangeText={setDateFrom}
               accessibilityLabel="From date"
-              className="border border-gray-300 rounded-md px-2 py-1.5 text-sm text-gray-900"
+              className="border border-border rounded-md px-2 py-1.5 text-sm text-content-primary"
             />
           </View>
           <View className="flex-1">
-            <Text className="text-[10px] text-gray-500 mb-1">To</Text>
-            <TextInput
+            <Text className="text-[10px] text-content-tertiary mb-1">To</Text>
+            <TextInput placeholderTextColor="#849CA5"
               value={dateTo}
               onChangeText={setDateTo}
               accessibilityLabel="To date"
-              className="border border-gray-300 rounded-md px-2 py-1.5 text-sm text-gray-900"
+              className="border border-border rounded-md px-2 py-1.5 text-sm text-content-primary"
             />
           </View>
         </View>
       )}
 
       {groupOptions.length > 0 && (
-        <View className="flex-row px-4 py-2 bg-white border-b border-gray-100">
+        <View className="flex-row px-4 py-2 bg-surface border-b border-border">
           {groupOptions.map((g) => (
             <TouchableOpacity
               key={g}
               onPress={() => setGroupBy(g)}
               accessibilityRole="button"
               accessibilityState={{ selected: groupBy === g }}
-              className={`px-3 py-1.5 rounded-full mr-2 ${groupBy === g ? 'bg-[#006269]' : 'bg-gray-100'}`}
+              className={`px-3 py-1.5 rounded-full mr-2 ${groupBy === g ? 'bg-brand' : 'bg-gray-100'}`}
             >
-              <Text className={`text-xs font-semibold capitalize ${groupBy === g ? 'text-white' : 'text-gray-600'}`}>
+              <Text className={`text-xs font-semibold capitalize ${groupBy === g ? 'text-white' : 'text-content-secondary'}`}>
                 {g}
               </Text>
             </TouchableOpacity>
@@ -241,19 +243,19 @@ export default function ReportsScreen({ navigation }: any) {
           )
         ) : activeTab === 'Outstanding' ? (
           (data || []).map((row: any) => (
-            <View key={row.party_id} className="bg-white border border-gray-200 rounded-xl p-4 mb-3">
-              <Text className="font-bold text-gray-900">{row.name}</Text>
-              <Text className="text-xs text-gray-500 mb-2">
+            <View key={row.party_id} className="bg-surface border border-border rounded-xl p-4 mb-3">
+              <Text className="font-bold text-content-primary">{row.name}</Text>
+              <Text className="text-xs text-content-tertiary mb-2">
                 {row.party_type === 'SUPPLIER' ? 'Purchaser' : 'Customer'}
                 {row.company_name ? ` · ${row.company_name}` : ''}
               </Text>
-              <Text className="text-sm text-gray-700">Opening: ₹{Number(row.opening_balance).toLocaleString()}</Text>
-              <Text className="text-sm text-gray-700">
+              <Text className="text-sm text-content-secondary">Opening: ₹{Number(row.opening_balance).toLocaleString()}</Text>
+              <Text className="text-sm text-content-secondary">
                 {row.party_type === 'SUPPLIER' ? 'Purchases' : 'Bills'}: ₹
                 {Number(row.bills_or_purchases).toLocaleString()}
               </Text>
-              <Text className="text-sm text-gray-700">Payments: ₹{Number(row.payments).toLocaleString()}</Text>
-              <Text className="text-sm font-bold text-[#006269] mt-1">
+              <Text className="text-sm text-content-secondary">Payments: ₹{Number(row.payments).toLocaleString()}</Text>
+              <Text className="text-sm font-bold text-brand mt-1">
                 Pending: ₹{Number(row.pending_amount).toLocaleString()}
               </Text>
             </View>
@@ -261,17 +263,17 @@ export default function ReportsScreen({ navigation }: any) {
         ) : activeTab === 'Expenses' ? (
           <>
             {(data?.rows || []).map((row: any) => (
-              <View key={row.key} className="bg-white border border-gray-200 rounded-xl p-4 mb-3">
-                <Text className="font-bold text-gray-900">{row.label}</Text>
-                <Text className="text-sm text-gray-700">Cash: ₹{Number(row.cash_amount).toLocaleString()}</Text>
-                <Text className="text-sm text-gray-700">UPI: ₹{Number(row.upi_amount).toLocaleString()}</Text>
-                <Text className="text-sm font-semibold text-[#006269]">
+              <View key={row.key} className="bg-surface border border-border rounded-xl p-4 mb-3">
+                <Text className="font-bold text-content-primary">{row.label}</Text>
+                <Text className="text-sm text-content-secondary">Cash: ₹{Number(row.cash_amount).toLocaleString()}</Text>
+                <Text className="text-sm text-content-secondary">UPI: ₹{Number(row.upi_amount).toLocaleString()}</Text>
+                <Text className="text-sm font-semibold text-brand">
                   Total: ₹{Number(row.total_amount).toLocaleString()}
                 </Text>
               </View>
             ))}
             {data && (
-              <View className="bg-[#006269] rounded-xl p-4 mt-2">
+              <View className="bg-brand rounded-xl p-4 mt-2">
                 <Text className="text-white font-bold">
                   Total ₹{Number(data.total_amount).toLocaleString()} (Cash ₹
                   {Number(data.total_cash).toLocaleString()} · UPI ₹{Number(data.total_upi).toLocaleString()})
@@ -282,17 +284,17 @@ export default function ReportsScreen({ navigation }: any) {
         ) : (
           <>
             {(data?.rows || []).map((row: any) => (
-              <View key={row.key} className="bg-white border border-gray-200 rounded-xl p-4 mb-3">
-                <Text className="font-bold text-gray-900">{row.label}</Text>
-                <Text className="text-sm text-gray-700">Qty: {row.quantity}</Text>
-                <Text className="text-sm text-gray-700">Bills: {row.count}</Text>
-                <Text className="text-sm font-semibold text-[#006269]">
+              <View key={row.key} className="bg-surface border border-border rounded-xl p-4 mb-3">
+                <Text className="font-bold text-content-primary">{row.label}</Text>
+                <Text className="text-sm text-content-secondary">Qty: {row.quantity}</Text>
+                <Text className="text-sm text-content-secondary">Bills: {row.count}</Text>
+                <Text className="text-sm font-semibold text-brand">
                   Amount: ₹{Number(row.amount).toLocaleString()}
                 </Text>
               </View>
             ))}
             {data && (
-              <View className="bg-[#006269] rounded-xl p-4 mt-2">
+              <View className="bg-brand rounded-xl p-4 mt-2">
                 <Text className="text-white font-bold">
                   Total qty {data.total_quantity} · ₹{Number(data.total_amount).toLocaleString()}
                 </Text>

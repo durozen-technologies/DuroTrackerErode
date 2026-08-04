@@ -56,3 +56,7 @@ Below is the list of models tracked in the BROILER 360 system:
 2. **InventoryService:** Oversell rejected with 422; purchase/sale reverse helpers; `get_low_stock_alerts`.
 3. **Purchase/Sale APIs:** Server recomputes line `amount` and header totals; PUT replaces bill after reverting stock/balance; responses include `party_name` and optional `low_stock_alerts`.
 4. **Reports:** Aggregated endpoints under `/api/reports/{purchases,sales,inventory,expenses,outstanding}`.
+
+### [2026-08-04 12:15:37] - Strict Payment Linking
+- **Payment Transaction:** Added `sale_id` and `purchase_id` nullable foreign keys.
+- Replaced heuristic amount/date matching with strict ID-based deletion during bill reverts.

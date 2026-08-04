@@ -95,3 +95,6 @@ graphify-out/
 *.pdf
 .cache/
 coverage/
+
+# Github Token
+.agents/github_token.txt

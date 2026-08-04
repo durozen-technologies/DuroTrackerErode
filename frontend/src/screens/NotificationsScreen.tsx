@@ -12,13 +12,13 @@ export default function NotificationsScreen({ navigation }: any) {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="px-4 py-3 bg-white border-b border-gray-200 flex-row items-center">
+    <SafeAreaView className="flex-1 bg-canvas">
+      <View className="px-4 py-3 bg-surface border-b border-border flex-row items-center">
         <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3">
           <ArrowLeft size={22} color="#111827" />
         </TouchableOpacity>
         <Bell size={20} color="#006269" />
-        <Text className="text-lg font-bold text-gray-900 ml-2">Notifications</Text>
+        <Text className="text-lg font-bold text-content-primary ml-2">Notifications</Text>
       </View>
 
       <ScrollView
@@ -28,18 +28,18 @@ export default function NotificationsScreen({ navigation }: any) {
         {isLoading ? (
           <ActivityIndicator size="large" color="#006269" className="mt-10" />
         ) : !data?.length ? (
-          <Text className="text-center text-gray-500 mt-10">No low stock alerts.</Text>
+          <Text className="text-center text-content-tertiary mt-10">No low stock alerts.</Text>
         ) : (
           data.map((item: any) => (
             <View key={item.id} className="bg-red-50 border border-red-100 rounded-xl p-4 mb-3">
               <Text className="text-red-800 font-bold text-base mb-1">Low Stock Alert</Text>
-              <Text className="text-gray-900 font-semibold">
+              <Text className="text-content-primary font-semibold">
                 {item.name_en} ({item.name_ta})
               </Text>
-              <Text className="text-sm text-gray-700 mt-2">
+              <Text className="text-sm text-content-secondary mt-2">
                 Available: {item.available_stock} {item.unit_type}
               </Text>
-              <Text className="text-sm text-gray-700">Minimum: {item.minimum_stock} {item.unit_type}</Text>
+              <Text className="text-sm text-content-secondary">Minimum: {item.minimum_stock} {item.unit_type}</Text>
               <Text className="text-sm text-red-700 mt-2 font-medium">Please reorder stock.</Text>
             </View>
           ))

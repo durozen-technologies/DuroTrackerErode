@@ -114,16 +114,9 @@ async def _load_sale(db: AsyncSession, sale_id) -> Sale | None:
     return result.scalar_one_or_none()
 
 
-async def _delete_matching_txn(db: AsyncSession, party_id, date, total_collected, txn_type):
-    if total_collected <= 0:
-        return
+async def _delete_sale_txn(db: AsyncSession, sale_id: UUID7):
     txn_result = await db.execute(
-        select(PaymentTransaction)
-        .where(PaymentTransaction.party_id == party_id)
-        .where(PaymentTransaction.date == date)
-        .where(PaymentTransaction.total_amount == total_collected)
-        .where(PaymentTransaction.type == txn_type)
-        .limit(1)
+        select(PaymentTransaction).where(PaymentTransaction.sale_id == sale_id)
     )
     old_txn = txn_result.scalar_one_or_none()
     if old_txn:
@@ -134,9 +127,7 @@ async def _revert_sale(db: AsyncSession, sale: Sale, customer: Party):
     old_collected = float(sale.cash_payment) + float(sale.upi_payment)
     customer.current_balance = float(customer.current_balance) - float(sale.total_amount)
     customer.current_balance = float(customer.current_balance) + old_collected
-    await _delete_matching_txn(
-        db, sale.party_id, sale.date, old_collected, TransactionType.RECEIVED
-    )
+    await _delete_sale_txn(db, sale.id)
     await InventoryService.revert_sale_items(db, list(sale.items))
 
 
@@ -210,6 +201,7 @@ async def _apply_sale(
         db.add(
             PaymentTransaction(
                 party_id=sale_in.party_id,
+                sale_id=db_sale.id,
                 date=bill_date,
                 type=TransactionType.RECEIVED,
                 cash_amount=cash,

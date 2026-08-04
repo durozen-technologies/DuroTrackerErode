@@ -527,3 +527,14 @@ Agent: Updated root `.gitignore` to comprehensively cover all local development 
 
 ### [2026-08-04 10:37:31] Fixed GitHub Action Node Crash
 - Root cause was a missing trailing newline in gradle.properties, corrupting JSON parsing when JVM args were appended. Fixed in workflow.
+
+### [2026-08-04 12:11:04] Codebase Audit
+- User asked about number of pages, confirmed 15 codebase screens and 6 dashboard buttons.
+- User asked to check for logic pitfalls. Verified backend inventory and ledger math is robust with a minor acceptable heuristic in PaymentTransactions.
+
+### [2026-08-04 12:15:37] Strict Payment Linking
+- User approved the implementation plan to make payment transactions strictly linked to bills. Execution completed successfully.
+
+### [2026-08-04 14:23:50] Created Production APK Workflow
+- User asked to create a GitHub Actions workflow to build the APK pointing to `erode.durozen.in`.
+- Created `build-android-release.yml`. Configured the API URL environment variable and used the debug keystore trick to produce a signed release APK without needing manual key setup.

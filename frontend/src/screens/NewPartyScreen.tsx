@@ -70,12 +70,12 @@ export default function NewPartyScreen({ navigation, route }: any) {
   const companyLabel = tab === 'SUPPLIER' ? 'Company Name' : 'Shop Name';
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="px-4 py-3 bg-white border-b border-gray-100 flex-row items-center">
+    <SafeAreaView className="flex-1 bg-canvas">
+      <View className="px-4 py-3 bg-surface border-b border-border flex-row items-center">
         <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
           <ArrowLeft size={24} color="#111827" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold text-gray-900">
+        <Text className="text-lg font-bold text-content-primary">
           {editData ? 'Edit Party' : 'Add Party'}
         </Text>
       </View>
@@ -88,20 +88,20 @@ export default function NewPartyScreen({ navigation, route }: any) {
         keyboardShouldPersistTaps="handled"
       >
         {!editData && (
-          <View className="flex-row border border-gray-200 rounded-lg mb-6 overflow-hidden bg-white">
+          <View className="flex-row border border-border rounded-lg mb-6 overflow-hidden bg-surface">
             <TouchableOpacity
-              className={`flex-1 py-3 items-center ${tab === 'SUPPLIER' ? 'bg-[#006269]' : 'bg-white'}`}
+              className={`flex-1 py-3 items-center ${tab === 'SUPPLIER' ? 'bg-brand' : 'bg-surface'}`}
               onPress={() => setTab('SUPPLIER')}
             >
-              <Text className={`text-sm font-semibold ${tab === 'SUPPLIER' ? 'text-white' : 'text-gray-500'}`}>
+              <Text className={`text-sm font-semibold ${tab === 'SUPPLIER' ? 'text-white' : 'text-content-tertiary'}`}>
                 Purchaser
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className={`flex-1 py-3 items-center ${tab === 'CUSTOMER' ? 'bg-[#006269]' : 'bg-white'}`}
+              className={`flex-1 py-3 items-center ${tab === 'CUSTOMER' ? 'bg-brand' : 'bg-surface'}`}
               onPress={() => setTab('CUSTOMER')}
             >
-              <Text className={`text-sm font-semibold ${tab === 'CUSTOMER' ? 'text-white' : 'text-gray-500'}`}>
+              <Text className={`text-sm font-semibold ${tab === 'CUSTOMER' ? 'text-white' : 'text-content-tertiary'}`}>
                 Customer
               </Text>
             </TouchableOpacity>
@@ -111,60 +111,60 @@ export default function NewPartyScreen({ navigation, route }: any) {
         <View className="mb-5">
           <View className="flex-row items-center mb-3">
             <User color="#006269" size={20} />
-            <Text className="text-sm font-semibold text-[#006269] ml-2">Details</Text>
+            <Text className="text-sm font-semibold text-brand ml-2">Details</Text>
           </View>
 
           <View className="mb-3">
-            <Text className="text-xs font-medium text-gray-700 mb-1">Name *</Text>
-            <TextInput
+            <Text className="text-xs font-medium text-content-secondary mb-1">Name *</Text>
+            <TextInput placeholderTextColor="#849CA5"
               value={form.name}
               onChangeText={(v) => setForm({ ...form, name: v })}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-md text-sm"
+              className="w-full px-3 py-2.5 bg-surface border border-border rounded-md text-sm text-content-primary"
             />
           </View>
 
           <View className="mb-3">
-            <Text className="text-xs font-medium text-gray-700 mb-1">{companyLabel}</Text>
-            <TextInput
+            <Text className="text-xs font-medium text-content-secondary mb-1">{companyLabel}</Text>
+            <TextInput placeholderTextColor="#849CA5"
               value={form.company_name}
               onChangeText={(v) => setForm({ ...form, company_name: v })}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-md text-sm"
+              className="w-full px-3 py-2.5 bg-surface border border-border rounded-md text-sm text-content-primary"
             />
           </View>
 
           <View className="mb-3">
-            <Text className="text-xs font-medium text-gray-700 mb-1">Mobile Number *</Text>
-            <TextInput
+            <Text className="text-xs font-medium text-content-secondary mb-1">Mobile Number *</Text>
+            <TextInput placeholderTextColor="#849CA5"
               keyboardType="phone-pad"
               value={form.mobile}
               onChangeText={(v) => setForm({ ...form, mobile: v })}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-md text-sm"
+              className="w-full px-3 py-2.5 bg-surface border border-border rounded-md text-sm text-content-primary"
             />
           </View>
 
           <View className="mb-3">
-            <Text className="text-xs font-medium text-gray-700 mb-1">Address</Text>
-            <TextInput
+            <Text className="text-xs font-medium text-content-secondary mb-1">Address</Text>
+            <TextInput placeholderTextColor="#849CA5"
               value={form.address}
               onChangeText={(v) => setForm({ ...form, address: v })}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-md text-sm"
+              className="w-full px-3 py-2.5 bg-surface border border-border rounded-md text-sm text-content-primary"
             />
           </View>
 
           <View className="mb-3">
-            <Text className="text-xs font-medium text-gray-700 mb-1">Opening Balance (₹)</Text>
-            <TextInput
+            <Text className="text-xs font-medium text-content-secondary mb-1">Opening Balance (₹)</Text>
+            <TextInput placeholderTextColor="#849CA5"
               keyboardType="numeric"
               value={form.opening_balance}
               onChangeText={(v) => setForm({ ...form, opening_balance: v })}
               editable={!editData}
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-md text-sm"
+              className="w-full px-3 py-2.5 bg-surface border border-border rounded-md text-sm text-content-primary"
             />
           </View>
 
           {editData && (
             <View className="flex-row items-center justify-between mt-2">
-              <Text className="text-sm text-gray-700">Active</Text>
+              <Text className="text-sm text-content-secondary">Active</Text>
               <Switch
                 value={form.is_active}
                 onValueChange={(v) => setForm({ ...form, is_active: v })}
@@ -175,17 +175,17 @@ export default function NewPartyScreen({ navigation, route }: any) {
         </View>
       </KeyboardAwareScrollView>
 
-      <View className="absolute bottom-0 w-full bg-white border-t border-gray-200 p-4 flex-row justify-between">
+      <View className="absolute bottom-0 w-full bg-surface border-t border-border p-4 flex-row justify-between">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          className="w-[30%] py-3 bg-white border border-gray-300 rounded-md items-center justify-center mr-2"
+          className="w-[30%] py-3 bg-surface border border-border rounded-md items-center justify-center mr-2"
         >
-          <Text className="text-gray-700 font-semibold text-sm">Cancel</Text>
+          <Text className="text-content-secondary font-semibold text-sm">Cancel</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleSave}
           disabled={mutation.isPending}
-          className="w-[68%] py-3 bg-[#006269] rounded-md flex-row items-center justify-center"
+          className="w-[68%] py-3 bg-brand rounded-md flex-row items-center justify-center"
         >
           <Save color="white" size={16} />
           <Text className="text-white font-semibold text-sm ml-2">

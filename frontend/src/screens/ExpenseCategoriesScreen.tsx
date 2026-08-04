@@ -86,14 +86,14 @@ export default function ExpenseCategoriesScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-canvas">
       {/* Top App Bar */}
-      <View className="flex-row items-center px-4 py-3 bg-white border-b border-gray-200">
+      <View className="flex-row items-center px-4 py-3 bg-surface border-b border-border">
         <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3">
           <ArrowLeft color="#111827" size={24} />
         </TouchableOpacity>
-        <Text className="flex-1 text-xl font-bold text-gray-900">Expense Categories</Text>
-        <TouchableOpacity onPress={openAddModal} className="w-10 h-10 bg-[#006269] rounded-full items-center justify-center">
+        <Text className="flex-1 text-xl font-bold text-content-primary">Expense Categories</Text>
+        <TouchableOpacity onPress={openAddModal} className="w-10 h-10 bg-brand rounded-full items-center justify-center">
           <Plus color="white" size={20} />
         </TouchableOpacity>
       </View>
@@ -108,18 +108,18 @@ export default function ExpenseCategoriesScreen() {
             <TouchableOpacity 
               key={cat.id} 
               onPress={() => openEditModal(cat)}
-              className={`bg-white p-4 rounded-xl border mb-3 flex-row items-center justify-between shadow-sm ${cat.is_active ? 'border-gray-200' : 'border-red-200 opacity-70'}`}
+              className={`bg-surface p-4 rounded-xl border mb-3 flex-row items-center justify-between shadow-sm ${cat.is_active ? 'border-border' : 'border-red-200 opacity-70'}`}
             >
               <View className="justify-center">
-                <Text className="text-base font-bold text-gray-900">{cat.name_en}</Text>
-                <Text className="text-xs text-gray-500 mt-1">{cat.is_active ? 'Active' : 'Inactive'}</Text>
+                <Text className="text-base font-bold text-content-primary">{cat.name_en}</Text>
+                <Text className="text-xs text-content-tertiary mt-1">{cat.is_active ? 'Active' : 'Inactive'}</Text>
               </View>
               <Edit2 color="#9ca3af" size={18} />
             </TouchableOpacity>
           ))}
           {categories?.length === 0 && (
             <View className="p-8 items-center">
-              <Text className="text-gray-500">No categories found. Tap + to add one.</Text>
+              <Text className="text-content-tertiary">No categories found. Tap + to add one.</Text>
             </View>
           )}
           <View className="h-20" />
@@ -129,15 +129,15 @@ export default function ExpenseCategoriesScreen() {
       {/* Modal */}
       <Modal visible={modalVisible} transparent={true} animationType="fade" onRequestClose={closeModal}>
         <View className="flex-1 justify-center bg-black/50 p-4">
-          <View className="bg-white rounded-2xl p-6">
-            <Text className="text-xl font-bold text-gray-900 mb-6 text-center">
+          <View className="bg-surface rounded-2xl p-6">
+            <Text className="text-xl font-bold text-content-primary mb-6 text-center">
               {editingId ? 'Edit Category' : 'New Category'}
             </Text>
             
             <View className="mb-4">
-              <Text className="text-sm font-semibold text-gray-700 mb-2">Category Name</Text>
-              <TextInput 
-                className="bg-gray-50 border border-gray-300 rounded-lg px-4 py-3 text-base"
+              <Text className="text-sm font-semibold text-content-secondary mb-2">Category Name</Text>
+              <TextInput placeholderTextColor="#849CA5" 
+                className="bg-canvas border border-border rounded-lg px-4 py-3 text-base text-content-primary"
                 placeholder="e.g. Fuel, Salary"
                 value={name}
                 onChangeText={setName}
@@ -145,7 +145,7 @@ export default function ExpenseCategoriesScreen() {
             </View>
 
             <View className="flex-row items-center justify-between mb-8">
-              <Text className="text-sm font-semibold text-gray-700">Is Active?</Text>
+              <Text className="text-sm font-semibold text-content-secondary">Is Active?</Text>
               <Switch 
                 value={isActive} 
                 onValueChange={setIsActive}
@@ -155,11 +155,11 @@ export default function ExpenseCategoriesScreen() {
 
             <View className="flex-row justify-end space-x-3 gap-3">
               <TouchableOpacity onPress={closeModal} className="flex-1 py-3 bg-gray-100 rounded-lg items-center">
-                <Text className="font-semibold text-gray-700">Cancel</Text>
+                <Text className="font-semibold text-content-secondary">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 onPress={handleSave} 
-                className="flex-1 py-3 bg-[#006269] rounded-lg items-center"
+                className="flex-1 py-3 bg-brand rounded-lg items-center"
                 disabled={createMutation.isPending || updateMutation.isPending}
               >
                 {createMutation.isPending || updateMutation.isPending ? (

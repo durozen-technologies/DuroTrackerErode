@@ -114,16 +114,9 @@ async def _load_purchase(db: AsyncSession, purchase_id) -> Purchase | None:
     return result.scalar_one_or_none()
 
 
-async def _delete_matching_txn(db: AsyncSession, party_id, date, total_paid, txn_type):
-    if total_paid <= 0:
-        return
+async def _delete_purchase_txn(db: AsyncSession, purchase_id: UUID7):
     txn_result = await db.execute(
-        select(PaymentTransaction)
-        .where(PaymentTransaction.party_id == party_id)
-        .where(PaymentTransaction.date == date)
-        .where(PaymentTransaction.total_amount == total_paid)
-        .where(PaymentTransaction.type == txn_type)
-        .limit(1)
+        select(PaymentTransaction).where(PaymentTransaction.purchase_id == purchase_id)
     )
     old_txn = txn_result.scalar_one_or_none()
     if old_txn:
@@ -134,9 +127,7 @@ async def _revert_purchase(db: AsyncSession, purchase: Purchase, supplier: Party
     old_paid = float(purchase.cash_payment) + float(purchase.upi_payment)
     supplier.current_balance = float(supplier.current_balance) - float(purchase.total_amount)
     supplier.current_balance = float(supplier.current_balance) + old_paid
-    await _delete_matching_txn(
-        db, purchase.party_id, purchase.date, old_paid, TransactionType.PAID
-    )
+    await _delete_purchase_txn(db, purchase.id)
     await InventoryService.revert_purchase_items(db, list(purchase.items))
 
 
@@ -212,6 +203,7 @@ async def _apply_purchase(
         db.add(
             PaymentTransaction(
                 party_id=purchase_in.party_id,
+                purchase_id=db_purchase.id,
                 date=bill_date,
                 type=TransactionType.PAID,
                 cash_amount=cash,

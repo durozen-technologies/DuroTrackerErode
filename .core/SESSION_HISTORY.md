@@ -377,3 +377,22 @@
 - Discovered that 'npx expo prebuild' generated gradle.properties without a trailing newline.
 - This caused 'echo' appending to corrupt the Expo watched directories array, leading to a Node CLI argument crash.
 - Added 'echo' newline to build-android.yml before appending JVM args.
+
+### [2026-08-04 12:11:04] Codebase Audit & Security
+- Analyzed the project architecture and data models.
+- Confirmed 15 frontend screens with 6 user-facing primary buttons.
+- Audited the Sales/Inventory business logic, verified ledger math is fully robust.
+- Saved user's GitHub Personal Access Token to .agents/github_token.txt and securely added it to .gitignore.
+
+### [2026-08-04 12:15:37] Implemented Strict Payment Linking
+- Added sale_id and purchase_id to payment_transactions model.
+- Refactored _apply_sale, _revert_sale, _apply_purchase, _revert_purchase to use deterministic foreign key linking.
+- Generated and ran Alembic migration.
+
+### [2026-08-04 13:00:00] UI Text and Colors Refactoring
+- **Context:** User requested standardizing UI text and colors.
+- **Action:** Migrated all hardcoded Tailwind gray scales and brand colors to semantic tokens across 15 screens. Ensured TextInputs have proper placeholder/text color.
+
+### [2026-08-04 14:23:50] GitHub Actions Production APK
+- **Request:** Create a git action to build the app APK pointing to erode.durozen.in
+- **Action:** Created `build-android-release.yml` with `assembleRelease` configured to use the debug keystore for an installable release APK.
