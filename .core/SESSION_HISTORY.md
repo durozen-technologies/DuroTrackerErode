@@ -368,3 +368,7 @@
 - [2026-08-01 10:44:45] Created Docker configuration files (`backend/Dockerfile`, `backend/start.sh`, and `docker-compose.yml`) to deploy the backend API and PostgreSQL database together. The frontend is not containerized since it is an Android mobile app (APK).
 
 - [2026-08-01 10:51:04] Removed hardcoded host port mappings (`8000:8000` and `5432:5432`) from `docker-compose.yml` because they caused a 'port already allocated' error on the deployment server. Dokploy handles routing dynamically, so host bindings are not required. Pushed the fix to the repository.
+
+### [2026-08-04 10:13:00] Fixed GitHub Action OOM Crash
+- Reduced NODE_OPTIONS max-old-space-size to 2048 and Gradle max heap to 2048m in build-android.yml to prevent Ubuntu runner from running out of 7GB RAM.
+- Committed and pushed the changes to trigger a new build.
