@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ChevronDown, ChevronUp, X } from 'lucide-react-native';
+import { toLocalYMD as toYMD } from '../../utils/dateUtils';
 import type { Item, Party, PartyType } from '../../types';
 
 export type InventorySegment = 'stock' | 'parties' | 'purchases' | 'sales';
@@ -26,9 +27,6 @@ type Props = {
   onClear: () => void;
 };
 
-function toYMD(d: Date) {
-  return d.toISOString().split('T')[0];
-}
 
 function activeCount(filters: InventoryFilterState, segment: InventorySegment): number {
   let n = 0;

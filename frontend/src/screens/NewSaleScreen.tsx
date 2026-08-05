@@ -7,6 +7,7 @@ import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Picker } from '@react-native-picker/picker';
 import { fetchParties, fetchItems, createSale, updateSale, deleteSale } from '../api/resources';
+import { toLocalYMD } from '../utils/dateUtils';
 
 type Line = {
   item_id: string;
@@ -23,7 +24,7 @@ export default function NewSaleScreen({ navigation, route }: any) {
   const queryClient = useQueryClient();
   const editData = route.params?.editData;
 
-  const [date, setDate] = useState(editData?.date || new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(editData?.date || toLocalYMD(new Date()));
   const [partyId, setPartyId] = useState(editData?.party_id || '');
   const [cash, setCash] = useState(String(editData?.cash_payment ?? ''));
   const [upi, setUpi] = useState(String(editData?.upi_payment ?? ''));
@@ -186,9 +187,9 @@ export default function NewSaleScreen({ navigation, route }: any) {
             value={new Date(date)}
             mode="date"
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onValueChange={(_, d) => {
+            onChange={(_, d) => {
               setShowDatePicker(Platform.OS === 'ios');
-              if (d) setDate(d.toISOString().split('T')[0]);
+              if (d) setDate(toLocalYMD(d));
             }}
             onDismiss={() => setShowDatePicker(false)}
           />

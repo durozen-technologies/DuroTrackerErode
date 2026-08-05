@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert, Platform, KeyboardAvoidingView } from 'react-native';
 // import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ChevronRight, Receipt, Trash2 } from 'lucide-react-native';
@@ -232,9 +232,13 @@ export default function ExpensesScreen() {
       {/* Modal for Recording Expense */}
       <Modal visible={!!selectedCategory} transparent={true} animationType="fade" onRequestClose={closeModal}>
         <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className="flex-1 justify-center bg-black/50 p-4"
+          behavior="padding"
+          className="flex-1 bg-black/50 p-4"
         >
+          <ScrollView 
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+            keyboardShouldPersistTaps="handled"
+          >
           <View className="bg-surface rounded-2xl p-6">
             <Text className="text-xl font-bold text-content-primary mb-2 text-center">
               {editExpense ? 'Edit' : 'Record'} {selectedCategory?.name_en}
@@ -305,8 +309,11 @@ export default function ExpensesScreen() {
               </TouchableOpacity>
             </View>
           </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
     </View>
   );
 }
+
+// EOF

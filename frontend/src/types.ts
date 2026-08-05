@@ -24,6 +24,7 @@ export interface Item {
   unit_type: UnitType;
   available_stock: number;
   used_stock: number;
+  min_stock_alert: number;
 }
 
 export interface BillLine {

@@ -6,15 +6,13 @@ import { ArrowLeft } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { recordPayment } from '../api/resources';
+import { toLocalYMD as toYMD } from '../utils/dateUtils';
 import type { PartyType } from '../types';
 
 function formatMoney(n: number) {
   return `₹${Math.abs(Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 }
 
-function toYMD(d: Date) {
-  return d.toISOString().split('T')[0];
-}
 
 export default function RecordPaymentScreen({ navigation, route }: any) {
   const queryClient = useQueryClient();

@@ -396,3 +396,23 @@
 ### [2026-08-04 14:23:50] GitHub Actions Production APK
 - **Request:** Create a git action to build the app APK pointing to erode.durozen.in
 - **Action:** Created `build-android-release.yml` with `assembleRelease` configured to use the debug keystore for an installable release APK.
+
+### [2026-08-05 11:17:33] Removed Mockup Notification Feature
+- **Request:** Remove the notification in the dashboard from the backend and frontend.
+- **Action:** Discovered backend had no notification logic. Removed Bell icon from `DashboardScreen.tsx`, removed route from `RootNavigator.tsx`, and deleted `NotificationsScreen.tsx`.
+
+### [2026-08-05 11:31:33] Inventory Stock List Simplification
+- **Request:** Remove click-to-edit redirect and simplify item cards to show only available count/kg.
+- **Action:** Removed `onPress` redirect from `StockList` in `InventoryScreen.tsx`. Stripped `Used`, `Purchased`, and `Sold` metrics from `InventoryItemCard.tsx` leaving a clean UI with only `Available (kg)` and `Available count`.
+
+### [2026-08-05 12:03:28] Added Min Stock Alerts
+- **Request:** Add Min Stock Alert field to items, and show a popup if a sale drops stock below the limit.
+### [2026-08-05 12:25:21] Keyboard Wrapper Audit and Fix
+- **Request:** Check if all text inputs in the app have a keyboard-aware wrapper so they aren't hidden by the keyboard, and fix missing ones without breaking layout.
+- **Action:** Audited the entire app. Found that the initial approach of copying `ExpensesScreen`'s `KeyboardAvoidingView` was flawed because Android `KeyboardAvoidingView` inside a transparent Modal behaves inconsistently. Safely refactored `ItemsScreen.tsx`, `ExpenseCategoriesScreen.tsx`, and `ExpensesScreen.tsx` to use the universally supported `KeyboardAvoidingView` with `behavior="padding"` and an inner `<ScrollView>`, which perfectly handles pushing up bottom-sheet style transparent modals on Android without hiding content. Fixed JSX syntax errors caused during the refactoring process.
+### [2026-08-05 12:51:24] Fix Frontend Timezone Bug
+- **Request:** Replace `.toISOString()` with local time extraction to fix UTC time shift bugs (where "Today" queries yesterday's data in morning hours).
+- **Action:** Created `src/utils/dateUtils.ts` with `toLocalYMD` (extracting strictly YYYY-MM-DD from the local time). Replaced `.toISOString()` in `DashboardScreen`, `ReportsScreen`, `RecordPaymentScreen`, `InventoryFilters`, `NewSaleScreen`, and `NewPurchaseScreen`. Explained that backend/DB are already using local server time implicitly, so the app is now completely native to the local timezone.
+### [2026-08-05 12:54:27] Dashboard Label Fix
+- **Request:** Apply next change to dashboard (addressing the misleading Net Profit).
+- **Action:** Renamed "NET PROFIT" to "NET BALANCE" in `DashboardScreen.tsx` because it calculates `Sales - Purchases - Expenses` (without accounting for COGS or unsold inventory), meaning it reflects a cash/accrual position rather than true profit. Noticed the `stats.inventory` list was actually already being mapped at the bottom of the screen as "Inventory Overview".

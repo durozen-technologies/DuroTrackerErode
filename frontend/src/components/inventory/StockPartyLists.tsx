@@ -10,10 +10,8 @@ function formatMoney(n: number) {
 
 export function StockList({
   rows,
-  onPressRow,
 }: {
   rows: InventoryReportRow[];
-  onPressRow: (row: InventoryReportRow) => void;
 }) {
   if (rows.length === 0) {
     return (
@@ -30,7 +28,7 @@ export function StockList({
   return (
     <>
       {rows.map((row) => (
-        <InventoryItemCard key={row.item_id} row={row} onPress={onPressRow} />
+        <InventoryItemCard key={row.item_id} row={row} />
       ))}
     </>
   );

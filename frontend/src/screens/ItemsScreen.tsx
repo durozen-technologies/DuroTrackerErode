@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Modal,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, Package, RefreshCcw, X, ArrowLeft } from 'lucide-react-native';
@@ -24,6 +25,7 @@ export default function ItemsScreen({ navigation, route }: any) {
     name_ta: '',
     name_en: '',
     unit_type: 'KG',
+    min_stock_alert: '',
   });
 
   const { data: items, isLoading, refetch, isRefetching } = useQuery({
@@ -33,7 +35,7 @@ export default function ItemsScreen({ navigation, route }: any) {
 
   const openCreate = () => {
     setEditItem(null);
-    setForm({ name_ta: '', name_en: '', unit_type: 'KG' });
+    setForm({ name_ta: '', name_en: '', unit_type: 'KG', min_stock_alert: '' });
     setModalOpen(true);
   };
 
@@ -43,6 +45,7 @@ export default function ItemsScreen({ navigation, route }: any) {
       name_ta: item.name_ta,
       name_en: item.name_en,
       unit_type: item.unit_type,
+      min_stock_alert: item.min_stock_alert != null ? String(item.min_stock_alert) : '',
     });
     setModalOpen(true);
   };
@@ -84,6 +87,7 @@ export default function ItemsScreen({ navigation, route }: any) {
       name_ta: form.name_ta.trim(),
       name_en: form.name_en.trim(),
       unit_type: form.unit_type,
+      min_stock_alert: parseFloat(form.min_stock_alert) || 0,
     });
   };
 
@@ -155,42 +159,58 @@ export default function ItemsScreen({ navigation, route }: any) {
       </ScrollView>
 
       <Modal visible={modalOpen} animationType="slide" transparent>
-        <View className="flex-1 justify-end bg-black/40">
-          <View className="bg-surface rounded-t-2xl p-4">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-bold text-content-primary">
-                {editItem ? 'Edit Item' : 'New Item'}
-              </Text>
-              <TouchableOpacity onPress={() => setModalOpen(false)} accessibilityLabel="Close">
-                <X color="#4B636B" size={22} />
+        <KeyboardAvoidingView 
+          behavior="padding"
+          className="flex-1 bg-black/40"
+        >
+          <ScrollView 
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View className="bg-surface rounded-t-2xl p-4">
+              <View className="flex-row justify-between items-center mb-4">
+                <Text className="text-lg font-bold text-content-primary">
+                  {editItem ? 'Edit Item' : 'New Item'}
+                </Text>
+                <TouchableOpacity onPress={() => setModalOpen(false)} accessibilityLabel="Close">
+                  <X color="#4B636B" size={22} />
+                </TouchableOpacity>
+              </View>
+              <Text className="text-xs text-content-secondary mb-1">Name (Tamil) *</Text>
+              <TextInput placeholderTextColor="#849CA5"
+                value={form.name_ta}
+                onChangeText={(v) => setForm({ ...form, name_ta: v })}
+                className="border border-border rounded-md px-3 py-2 mb-3 bg-canvas text-content-primary"
+              />
+              <Text className="text-xs text-content-secondary mb-1">Name (English) *</Text>
+              <TextInput placeholderTextColor="#849CA5"
+                value={form.name_en}
+                onChangeText={(v) => setForm({ ...form, name_en: v })}
+                className="border border-border rounded-md px-3 py-2 mb-3 bg-canvas text-content-primary"
+              />
+              <Text className="text-xs text-content-secondary mb-1">Unit Type</Text>
+              <View className="border border-border rounded-md mb-3 bg-canvas justify-center" style={{ height: 50 }}>
+                <Picker selectedValue={form.unit_type} onValueChange={(v) => setForm({ ...form, unit_type: v })} style={{ height: 50, width: '100%', color: '#111827' }} dropdownIconColor="#111827">
+                  <Picker.Item label="Kg" value="KG" />
+                  <Picker.Item label="Unit" value="UNIT" />
+                </Picker>
+              </View>
+              <Text className="text-xs text-content-secondary mb-1">Min Stock Alert</Text>
+              <TextInput placeholderTextColor="#849CA5"
+                keyboardType="decimal-pad"
+                placeholder="e.g. 50"
+                value={form.min_stock_alert}
+                onChangeText={(v) => setForm({ ...form, min_stock_alert: v })}
+                className="border border-border rounded-md px-3 py-2 mb-4 bg-canvas text-content-primary"
+              />
+              <TouchableOpacity onPress={save} className="bg-brand py-3 rounded-md items-center">
+                <Text className="text-surface font-semibold">
+                  {mutation.isPending ? 'Saving...' : 'Save Item'}
+                </Text>
               </TouchableOpacity>
             </View>
-            <Text className="text-xs text-content-secondary mb-1">Name (Tamil) *</Text>
-            <TextInput placeholderTextColor="#849CA5"
-              value={form.name_ta}
-              onChangeText={(v) => setForm({ ...form, name_ta: v })}
-              className="border border-border rounded-md px-3 py-2 mb-3 bg-canvas text-content-primary"
-            />
-            <Text className="text-xs text-content-secondary mb-1">Name (English) *</Text>
-            <TextInput placeholderTextColor="#849CA5"
-              value={form.name_en}
-              onChangeText={(v) => setForm({ ...form, name_en: v })}
-              className="border border-border rounded-md px-3 py-2 mb-3 bg-canvas text-content-primary"
-            />
-            <Text className="text-xs text-content-secondary mb-1">Unit Type</Text>
-            <View className="border border-border rounded-md mb-4 bg-canvas justify-center" style={{ height: 50 }}>
-              <Picker selectedValue={form.unit_type} onValueChange={(v) => setForm({ ...form, unit_type: v })} style={{ height: 50, width: '100%', color: '#111827' }} dropdownIconColor="#111827">
-                <Picker.Item label="Kg" value="KG" />
-                <Picker.Item label="Unit" value="UNIT" />
-              </Picker>
-            </View>
-            <TouchableOpacity onPress={save} className="bg-brand py-3 rounded-md items-center">
-              <Text className="text-surface font-semibold">
-                {mutation.isPending ? 'Saving...' : 'Save Item'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );

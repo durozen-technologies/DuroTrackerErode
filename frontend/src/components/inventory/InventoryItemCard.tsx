@@ -18,10 +18,8 @@ function MetricCell({ label, value }: { label: string; value: string }) {
 
 export function InventoryItemCard({
   row,
-  onPress,
 }: {
   row: InventoryReportRow;
-  onPress?: (row: InventoryReportRow) => void;
 }) {
   const unit = row.unit_type === 'KG' ? 'kg' : 'unit';
   const showCount = Number(row.purchased_count) > 0 || Number(row.sold_count) > 0;
@@ -47,33 +45,13 @@ export function InventoryItemCard({
 
       <View className="flex-row flex-wrap border-t border-border pt-3">
         <MetricCell label={`Available (${unit})`} value={formatQty(row.available_stock)} />
-        <MetricCell label={`Used (${unit})`} value={formatQty(row.used_stock)} />
-        <MetricCell label={`Purchased (${unit})`} value={formatQty(row.purchased_quantity)} />
-        <MetricCell label={`Sold (${unit})`} value={formatQty(row.sold_quantity)} />
-      </View>
-
-      {showCount ? (
-        <View className="flex-row flex-wrap border-t border-border pt-3">
+        {showCount ? (
           <MetricCell label="Available count" value={formatQty(row.available_count)} />
-          <MetricCell label="Purchased count" value={formatQty(row.purchased_count)} />
-          <MetricCell label="Sold count" value={formatQty(row.sold_count)} />
-        </View>
-      ) : null}
+        ) : null}
+      </View>
     </>
   );
 
-  if (onPress) {
-    return (
-      <TouchableOpacity
-        onPress={() => onPress(row)}
-        className="bg-surface border border-border rounded-xl p-4 mb-3"
-        accessibilityRole="button"
-        accessibilityLabel={a11y}
-      >
-        {body}
-      </TouchableOpacity>
-    );
-  }
 
   return (
     <View

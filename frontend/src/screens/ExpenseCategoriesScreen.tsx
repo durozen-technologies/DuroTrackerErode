@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Switch, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Switch, Alert, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit2, ArrowLeft } from 'lucide-react-native';
@@ -126,9 +126,15 @@ export default function ExpenseCategoriesScreen() {
         </ScrollView>
       )}
 
-      {/* Modal */}
       <Modal visible={modalVisible} transparent={true} animationType="fade" onRequestClose={closeModal}>
-        <View className="flex-1 justify-center bg-black/50 p-4">
+        <KeyboardAvoidingView 
+          behavior="padding"
+          className="flex-1 bg-black/50 p-4"
+        >
+          <ScrollView 
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+            keyboardShouldPersistTaps="handled"
+          >
           <View className="bg-surface rounded-2xl p-6">
             <Text className="text-xl font-bold text-content-primary mb-6 text-center">
               {editingId ? 'Edit Category' : 'New Category'}
@@ -170,7 +176,8 @@ export default function ExpenseCategoriesScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );

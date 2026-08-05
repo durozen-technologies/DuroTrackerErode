@@ -15,7 +15,7 @@ class ItemBase(BaseModel):
     name_ta: str
     name_en: str
     unit_type: UnitType
-
+    min_stock_alert: float = 0.0
 
 class ItemCreate(ItemBase):
     pass
@@ -25,7 +25,7 @@ class ItemUpdate(BaseModel):
     name_ta: Optional[str] = None
     name_en: Optional[str] = None
     unit_type: Optional[UnitType] = None
-
+    min_stock_alert: Optional[float] = None
 
 class ItemResponse(ItemBase):
     id: UUID7
@@ -47,6 +47,7 @@ async def create_item(item: ItemCreate, db: AsyncSession = Depends(deps.get_db))
         name_ta=item.name_ta,
         name_en=item.name_en,
         unit_type=item.unit_type,
+        min_stock_alert=item.min_stock_alert,
     )
     db.add(db_item)
     await db.commit()

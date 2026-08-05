@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Printer } from 'lucide-react-native';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { fetchReport } from '../api/resources';
+import { toLocalYMD as toYMD } from '../utils/dateUtils';
 import { exportReportToPdf } from '../utils/pdfReport';
 import { OverallReportView, type OverallReportData } from '../components/reports/OverallReportView';
 import { InventoryItemCard } from '../components/inventory/InventoryItemCard';
@@ -11,9 +12,6 @@ import { InventoryItemCard } from '../components/inventory/InventoryItemCard';
 type ReportType = 'Overall' | 'Purchases' | 'Sales' | 'Inventory' | 'Expenses' | 'Outstanding';
 type GroupBy = 'date' | 'party' | 'item' | 'category';
 
-function toYMD(d: Date) {
-  return d.toISOString().split('T')[0];
-}
 
 export default function ReportsScreen({ navigation }: any) {
   const [activeTab, setActiveTab] = useState<ReportType>('Overall');

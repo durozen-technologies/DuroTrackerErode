@@ -15,7 +15,6 @@ import ExpenseCategoriesScreen from '../screens/ExpenseCategoriesScreen';
 import ReportsScreen from '../screens/ReportsScreen';
 import ItemsScreen from '../screens/ItemsScreen';
 import InventoryScreen from '../screens/InventoryScreen';
-import NotificationsScreen from '../screens/NotificationsScreen';
 import PartyLedgerScreen from '../screens/PartyLedgerScreen';
 import RecordPaymentScreen from '../screens/RecordPaymentScreen';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
@@ -148,7 +147,6 @@ export function RootNavigator() {
       <Stack.Screen name="ExpenseCategories" component={ExpenseCategoriesScreen} />
       <Stack.Screen name="Reports" component={ReportsScreen} />
       <Stack.Screen name="Items" component={ItemsScreen} />
-      <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="PartyLedger" component={PartyLedgerScreen} />
       <Stack.Screen name="RecordPayment" component={RecordPaymentScreen} />
     </Stack.Navigator>

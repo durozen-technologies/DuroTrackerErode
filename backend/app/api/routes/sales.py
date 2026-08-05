@@ -62,6 +62,7 @@ class SaleResponse(BaseModel):
     vehicle_number: Optional[str] = None
     items: List[SaleItemResponse]
     party_name: Optional[str] = None
+    low_stock_alerts: Optional[List[dict]] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -87,6 +88,15 @@ async def _build_sale_response(db: AsyncSession, sale: Sale) -> dict:
                 "unit_type": li.item.unit_type.value if li.item else None,
             }
         )
+    low_stock_alerts = []
+    for li in sale.items:
+        if li.item and float(li.item.min_stock_alert) > 0 and float(li.item.available_stock) <= float(li.item.min_stock_alert):
+            low_stock_alerts.append({
+                "item_name": li.item.name_en,
+                "available": float(li.item.available_stock),
+                "minimum": float(li.item.min_stock_alert),
+            })
+            
     return {
         "id": sale.id,
         "party_id": sale.party_id,
@@ -99,6 +109,7 @@ async def _build_sale_response(db: AsyncSession, sale: Sale) -> dict:
         "vehicle_number": sale.vehicle_number,
         "items": items_out,
         "party_name": party_name,
+        "low_stock_alerts": low_stock_alerts,
     }
 
 

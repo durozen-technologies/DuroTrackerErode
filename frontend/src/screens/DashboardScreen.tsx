@@ -11,16 +11,13 @@ import {
   ChevronRight,
   FileText,
   Package,
-  Bell,
   Tag,
 } from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { fetchDashboardStats } from '../api/resources';
+import { toLocalYMD as toYMD } from '../utils/dateUtils';
 
-function toYMD(d: Date) {
-  return d.toISOString().split('T')[0];
-}
 
 function rangeFor(chip: 'today' | 'yesterday' | 'week') {
   const today = new Date();
@@ -61,7 +58,6 @@ export default function DashboardScreen() {
     customer_outstanding: 0,
     supplier_outstanding: 0,
     inventory: [],
-    low_stock_alerts: [],
   };
 
   const Chip = ({ id, label }: { id: typeof chip; label: string }) => (
@@ -78,17 +74,6 @@ export default function DashboardScreen() {
       <View className="flex-row items-center justify-between px-4 py-3 bg-surface border-b border-border">
         <Text className="text-xl font-bold text-brand">Broiler 360</Text>
         <View className="flex-row items-center">
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Notifications')}
-            className="flex-row items-center bg-brand-muted px-3 py-1.5 rounded-full mr-2"
-          >
-            <Bell size={18} color="#006269" />
-            {(stats.low_stock_alerts?.length || 0) > 0 && (
-              <View className="ml-1 bg-status-error rounded-full px-1.5">
-                <Text className="text-surface text-[10px] font-bold">{stats.low_stock_alerts.length}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.navigate('Reports')}
             className="flex-row items-center bg-brand-muted px-3 py-1.5 rounded-full"
@@ -130,7 +115,7 @@ export default function DashboardScreen() {
           </View>
           <View className="w-[48%] bg-brand p-4 rounded-xl mb-3 h-28 justify-between">
             <View className="flex-row justify-between items-start">
-              <Text className="text-xs font-bold text-surface">NET PROFIT</Text>
+              <Text className="text-xs font-bold text-surface">NET BALANCE</Text>
               <BarChart2 color="white" size={16} />
             </View>
             <Text className="text-lg font-bold text-surface">₹{(stats.net_profit || 0).toLocaleString()}</Text>
@@ -227,6 +212,7 @@ export default function DashboardScreen() {
           </View>
         </View>
 
+
         <View className="bg-surface p-4 rounded-xl border border-border mb-10">
           <Text className="text-lg font-bold text-content-primary mb-4">Inventory Overview</Text>
           {stats.inventory?.length ? (
@@ -248,20 +234,6 @@ export default function DashboardScreen() {
             ))
           ) : (
             <Text className="text-content-secondary text-center py-4">No inventory items found</Text>
-          )}
-
-          {stats.low_stock_alerts?.length > 0 && (
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Notifications')}
-              className="mt-4 p-3 bg-status-errorBg rounded-lg border border-[#FECACA]"
-            >
-              <Text className="text-status-error font-bold mb-2">Low Stock Alerts — tap for details</Text>
-              {stats.low_stock_alerts.map((alert: any, index: number) => (
-                <Text key={index} className="text-[#991B1B] text-xs">
-                  • {alert.item_name}: {alert.available} (min {alert.minimum})
-                </Text>
-              ))}
-            </TouchableOpacity>
           )}
         </View>
       </ScrollView>

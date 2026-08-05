@@ -538,3 +538,24 @@ Agent: Updated root `.gitignore` to comprehensively cover all local development 
 ### [2026-08-04 14:23:50] Created Production APK Workflow
 - User asked to create a GitHub Actions workflow to build the APK pointing to `erode.durozen.in`.
 - Created `build-android-release.yml`. Configured the API URL environment variable and used the debug keystore trick to produce a signed release APK without needing manual key setup.
+
+### [2026-08-05 11:17:33] Removed Mockup Notification Feature
+- User requested removal of dashboard notifications.
+- Created and executed implementation plan to delete `NotificationsScreen.tsx` and all references to it in `DashboardScreen.tsx` and `RootNavigator.tsx`. Backend required no changes as it was a frontend-only mockup.
+
+### [2026-08-05 11:31:33] Simplified Inventory Stock View
+- User asked to simplify the Inventory Stock screen by removing historical metrics and disabling the click-to-edit redirect.
+- Generated implementation plan. Upon approval, modified `InventoryItemCard.tsx` and `InventoryScreen.tsx` to remove the `onPress` wrapper and strip the complex historical metrics, leaving only available stock.
+
+### [2026-08-05 12:03:28] Min Stock Alert Implementation
+- User asked to add a Min Stock Alert field for items, and if a sale breaches it, show a low stock popup.
+### [2026-08-05 12:25:21] Keyboard Wrapper Audit and Fixes
+- User asked to audit all text boxes in the app to see if they are wrapped in a keyboard-aware view. 
+- Conducted the audit and found that most screens were properly wrapped or had inputs at the top, except for the modals in `ItemsScreen`, `ExpenseCategoriesScreen`, and `ExpensesScreen`.
+- User uploaded a screenshot showing the `KeyboardAvoidingView` failing on Android. Switched to `KeyboardAvoidingView` with `behavior="padding"` and an inner `<ScrollView>` on all 3 modal screens, fixing the well-known Android transparent modal keyboard bug while restoring missing JSX tags that were accidentally removed during the refactor.
+### [2026-08-05 12:51:24] Fix Frontend Timezone Bug
+- Explained that `.toISOString()` shifts the date to UTC, causing early-morning requests in India to fetch the previous day's data. Assured user that the backend (FastAPI) and Postgres DB are correctly natively recording transactions in local time.
+- Created `dateUtils.ts` and successfully swapped out all instances of `.toISOString()` across all 6 frontend screens to strictly enforce local device time extraction (IST).
+### [2026-08-05 12:54:27] Dashboard Label Fix
+- User asked to proceed with the next dashboard change.
+- Renamed "NET PROFIT" to "NET BALANCE" to prevent misleading accounting expectations, as it does not calculate Cost of Goods Sold. (Discovered that the inventory overview was already safely rendering at the bottom of the dashboard layout).

@@ -142,25 +142,6 @@ export default function InventoryScreen({ navigation }: any) {
     if (segment === 'sales') salesQ.refetch();
   };
 
-  const openStockItem = (row: InventoryReportRow) => {
-    const item = (itemsQ.data || []).find((it: Item) => it.id === row.item_id);
-    if (item) {
-      navigation.navigate('Items', { editItem: item });
-      return;
-    }
-    // Fallback when items cache is empty: pass report fields Items can still open.
-    navigation.navigate('Items', {
-      editItem: {
-        id: row.item_id,
-        name_en: row.name_en,
-        name_ta: row.name_ta,
-        unit_type: row.unit_type,
-        available_stock: row.available_stock,
-        used_stock: row.used_stock,
-      },
-    });
-  };
-
   const summary =
     segment === 'stock'
       ? `${stockRows.length} item${stockRows.length === 1 ? '' : 's'}`
@@ -261,7 +242,7 @@ export default function InventoryScreen({ navigation }: any) {
             </TouchableOpacity>
           </View>
         ) : segment === 'stock' ? (
-          <StockList rows={stockRows} onPressRow={openStockItem} />
+          <StockList rows={stockRows} />
         ) : segment === 'parties' ? (
           <PartyList
             parties={partyRows}
