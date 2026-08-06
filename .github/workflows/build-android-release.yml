@@ -25,7 +25,7 @@ jobs:
           cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
 
@@ -35,7 +35,7 @@ jobs:
           python-version: '3.10'
 
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -58,10 +58,10 @@ jobs:
       - name: Build Release APK with Gradle
         working-directory: ./frontend/android
         env:
-          NODE_OPTIONS: "--max-old-space-size=2048"
+          NODE_OPTIONS: "--max-old-space-size=4096"
         run: |
           echo "" >> gradle.properties
-          echo "org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> gradle.properties
+          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" >> gradle.properties
           echo "org.gradle.workers.max=2" >> gradle.properties
           chmod +x gradlew
           ./gradlew :app:assembleRelease -Pandroid.injected.signing.store.file=$HOME/.android/debug.keystore -Pandroid.injected.signing.store.password=android -Pandroid.injected.signing.key.alias=androiddebugkey -Pandroid.injected.signing.key.password=android --no-daemon --stacktrace
