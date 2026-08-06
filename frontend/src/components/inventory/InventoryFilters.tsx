@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ChevronDown, ChevronUp, X } from 'lucide-react-native';
-import { toLocalYMD as toYMD } from '../../utils/dateUtils';
+import { toLocalYMD as toYMD, formatDisplayDate } from '../../utils/dateUtils';
 import type { Item, Party, PartyType } from '../../types';
 
 export type InventorySegment = 'stock' | 'parties' | 'purchases' | 'sales';
@@ -113,7 +113,7 @@ export default function InventoryFilters({
                   className="border border-border rounded-md px-3 py-2.5 bg-canvas"
                   accessibilityLabel="Filter from date"
                 >
-                  <Text className="text-content-primary text-sm">{filters.dateFrom || 'Any'}</Text>
+                  <Text className="text-content-primary text-sm">{filters.dateFrom ? formatDisplayDate(filters.dateFrom) : 'Any'}</Text>
                 </TouchableOpacity>
               </View>
               <View className="flex-1">
@@ -123,7 +123,7 @@ export default function InventoryFilters({
                   className="border border-border rounded-md px-3 py-2.5 bg-canvas"
                   accessibilityLabel="Filter to date"
                 >
-                  <Text className="text-content-primary text-sm">{filters.dateTo || 'Any'}</Text>
+                  <Text className="text-content-primary text-sm">{filters.dateTo ? formatDisplayDate(filters.dateTo) : 'Any'}</Text>
                 </TouchableOpacity>
               </View>
             </View>

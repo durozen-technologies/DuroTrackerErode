@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ChevronRight, Receipt, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { fetchExpenseCategories, createExpenseEntry, updateExpenseEntry, deleteExpenseEntry, fetchExpensesHistory, ExpenseCategory, ExpenseEntry } from '../api/expenses';
+import { formatDisplayDate } from '../utils/dateUtils';
 
 export default function ExpensesScreen() {
   const navigation = useNavigation();
@@ -133,7 +134,7 @@ export default function ExpensesScreen() {
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
-    return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    return `${formatDisplayDate(dateStr.split('T')[0])} ${d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
   };
 
   return (

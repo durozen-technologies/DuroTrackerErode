@@ -4,6 +4,7 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshCon
 import { Plus, ShoppingCart, RefreshCcw } from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPurchases } from '../api/resources';
+import { formatDisplayDate } from '../utils/dateUtils';
 
 export default function PurchasesScreen({ navigation }: any) {
   const { data: purchases, isLoading, isError, error, refetch, isRefetching } = useQuery({
@@ -62,7 +63,7 @@ export default function PurchasesScreen({ navigation }: any) {
                 </View>
                 <View className="flex-1">
                   <Text className="font-medium text-content-primary text-base">
-                    {purchase.party_name || 'Purchaser'} · {purchase.date}
+                    {purchase.party_name || 'Purchaser'} · {formatDisplayDate(purchase.date)}
                   </Text>
                   <Text className="text-xs text-content-tertiary mt-1">
                     {(purchase.items || [])

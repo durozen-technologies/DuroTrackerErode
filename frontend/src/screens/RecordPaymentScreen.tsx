@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { recordPayment } from '../api/resources';
-import { toLocalYMD as toYMD } from '../utils/dateUtils';
+import { toLocalYMD as toYMD, formatDisplayDate, parseDisplayDateToApi } from '../utils/dateUtils';
 import type { PartyType } from '../types';
 
 function formatMoney(n: number) {
@@ -26,7 +26,7 @@ export default function RecordPaymentScreen({ navigation, route }: any) {
   const cashLabel = isSupplier ? 'Cash Paid' : 'Cash Received';
   const upiLabel = isSupplier ? 'UPI Paid' : 'UPI Received';
 
-  const [date, setDate] = useState(toYMD(new Date()));
+  const [date, setDate] = useState(formatDisplayDate(toYMD(new Date())));
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [cash, setCash] = useState('');
   const [upi, setUpi] = useState('');
@@ -41,7 +41,7 @@ export default function RecordPaymentScreen({ navigation, route }: any) {
     mutationFn: () =>
       recordPayment({
         party_id: partyId,
-        date,
+        date: parseDisplayDateToApi(date),
         cash_amount: cashNum,
         upi_amount: upiNum,
       }),
@@ -121,12 +121,12 @@ export default function RecordPaymentScreen({ navigation, route }: any) {
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
-              value={new Date(date)}
+              value={new Date(parseDisplayDateToApi(date))}
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onValueChange={(_e, selected) => {
                 setShowDatePicker(Platform.OS === 'ios');
-                if (selected) setDate(toYMD(selected));
+                if (selected) setDate(formatDisplayDate(toYMD(selected)));
               }}
               onDismiss={() => setShowDatePicker(false)}
             />

@@ -7,7 +7,7 @@ import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Picker } from '@react-native-picker/picker';
 import { fetchParties, fetchItems, createSale, updateSale, deleteSale } from '../api/resources';
-import { toLocalYMD } from '../utils/dateUtils';
+import { toLocalYMD, formatDisplayDate, parseDisplayDateToApi } from '../utils/dateUtils';
 
 type Line = {
   item_id: string;
@@ -24,7 +24,7 @@ export default function NewSaleScreen({ navigation, route }: any) {
   const queryClient = useQueryClient();
   const editData = route.params?.editData;
 
-  const [date, setDate] = useState(editData?.date || toLocalYMD(new Date()));
+  const [date, setDate] = useState(editData?.date ? formatDisplayDate(editData.date) : formatDisplayDate(toLocalYMD(new Date())));
   const [partyId, setPartyId] = useState(editData?.party_id || '');
   const [cash, setCash] = useState(String(editData?.cash_payment ?? ''));
   const [upi, setUpi] = useState(String(editData?.upi_payment ?? ''));
@@ -138,7 +138,7 @@ export default function NewSaleScreen({ navigation, route }: any) {
     }
     mutation.mutate({
       party_id: partyId,
-      date,
+      date: parseDisplayDateToApi(date),
       cash_payment: parseFloat(cash) || 0,
       upi_payment: parseFloat(upi) || 0,
       items: payloadItems,

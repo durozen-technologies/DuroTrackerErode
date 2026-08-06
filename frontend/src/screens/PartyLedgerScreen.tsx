@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Pencil, IndianRupee } from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
 import { fetchPartyLedger } from '../api/resources';
+import { formatDisplayDate } from '../utils/dateUtils';
 import type { LedgerEntry, Party } from '../types';
 
 function formatMoney(n: number) {
@@ -25,7 +26,7 @@ function EntryRow({ entry }: { entry: LedgerEntry }) {
       <View className="bg-surface border border-border rounded-xl p-4 mb-3">
         <View className="flex-row items-center justify-between mb-1">
           <Text className="text-sm font-semibold text-content-primary">{label}</Text>
-          <Text className="text-xs text-content-secondary">{entry.date}</Text>
+          <Text className="text-xs text-content-secondary">{formatDisplayDate(entry.date)}</Text>
         </View>
         <View className="flex-row items-center justify-between mt-1">
           <Text className="text-base font-bold text-content-primary">

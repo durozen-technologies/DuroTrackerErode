@@ -559,3 +559,36 @@ Agent: Updated root `.gitignore` to comprehensively cover all local development 
 ### [2026-08-05 12:54:27] Dashboard Label Fix
 - User asked to proceed with the next dashboard change.
 - Renamed "NET PROFIT" to "NET BALANCE" to prevent misleading accounting expectations, as it does not calculate Cost of Goods Sold. (Discovered that the inventory overview was already safely rendering at the bottom of the dashboard layout).
+
+### [2026-08-05 11:06:33] User reported frontend build errors
+I fixed the import errors across NewPurchase, NewSale, Expenses, PartyLedger screens and the PDF utilities.
+
+### [2026-08-05 11:13:23] User reported incorrect date and requested PDF name change
+Fixed formatDisplayDate bug incorrectly re-parsing already-formatted dates into year 16, and changed PDF title to Purchase Report.
+
+### [2026-08-05 11:16:43] Added Total Count to PDF
+I calculated the total count and placed it into the footer of the Purchase Report.
+
+### [2026-08-05 11:22:07] Removed PDF Footers
+User requested to remove the Printed from Broiler 360 footer. Removed from all PDF scripts.
+
+- [2026-08-06 09:20:00] Completed changes to remove Date/Party/Item grouping from the UI and backend for Sales and Purchases reports. Implemented a detailed Sales Report PDF download. Updated ReportsScreen.tsx, reports.py, resources.ts, and exportDetailedSalesPdf.ts.
+
+
+- [2026-08-06 09:25:00] Configured frontend API IP to match current machine's Wi-Fi IP (192.168.232.208).
+
+
+- [2026-08-06 09:27:00] User requested to configure the IP. Verified the local IP is 192.168.1.9 and it is already correctly configured in frontend/.env.
+
+
+- [2026-08-06 09:45:00] Restored the accidentally deleted /api/reports/inventory and /api/reports/outstanding endpoints to reports.py.
+
+
+- [2026-08-06 09:50:00] User asked if exportSalesPdf.ts is still needed. Confirmed it is still used for the main Sales summary PDF export.
+
+
+### [2026-08-06 10:20:00]
+- Found and fixed massive duplication in backend/app/api/routes/reports.py caused by regex mismatch.
+- Re-verified frontend components.
+- Updated SESSION_HISTORY.md
+

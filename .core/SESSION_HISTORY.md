@@ -416,3 +416,41 @@
 ### [2026-08-05 12:54:27] Dashboard Label Fix
 - **Request:** Apply next change to dashboard (addressing the misleading Net Profit).
 - **Action:** Renamed "NET PROFIT" to "NET BALANCE" in `DashboardScreen.tsx` because it calculates `Sales - Purchases - Expenses` (without accounting for COGS or unsold inventory), meaning it reflects a cash/accrual position rather than true profit. Noticed the `stats.inventory` list was actually already being mapped at the bottom of the screen as "Inventory Overview".
+
+### [2026-08-05 14:43:44] Detailed Purchases Report
+- Modified /reports/purchases endpoint to fetch flat, party-wise detailed items.
+- Removed Group By buttons from Purchases tab in ReportsScreen.
+- Created detailedPurchasesSection in pdfReport.ts for grouping flat data by party in the PDF.
+
+### [2026-08-05 11:06:33] Fixed Frontend Syntax Errors
+- Fixed import placement in ExpensesScreen.tsx
+- Added missing formatDisplayDate and parseDisplayDateToApi imports across NewPurchaseScreen, NewSaleScreen, PartyLedgerScreen
+- Fixed exportDetailedPurchasesPdf.ts import path to utils/dateUtils.
+
+### [2026-08-05 11:13:23] Fixed Date formatting and PDF Title
+- Modified formatDisplayDate to return immediately if the date string is already in DD-MM-YYYY format, preventing incorrect Date parsing on already formatted dates.
+- Renamed exportDetailedPurchasesPdf PDF title to Purchase Report and file name to Purchase_Report.
+
+### [2026-08-05 11:16:43] Added Total Count to PDF
+- Modified exportDetailedPurchasesPdf to calculate and display the total count instead of a hyphen.
+
+### [2026-08-05 11:22:07] Removed PDF Footers
+- Removed the printed footer text and top border line from exportDetailedPurchasesPdf, exportSalesPdf, exportExpensesPdf, and exportOverallPdf.
+
+- [2026-08-06 09:20:00] User requested to remove the Date/Party/Item grouping from the UI and backend for Sales and Purchases reports, and implemented a detailed Sales Report PDF download similar to Purchases. Created plan, executed changes in reports.py, resources.ts, ReportsScreen.tsx, and exportDetailedSalesPdf.ts. Re-started backend and frontend servers.
+
+
+- [2026-08-06 09:25:00] User requested to configure IP. Updated EXPO_PUBLIC_API_URL in frontend/.env to current Wi-Fi IP (192.168.232.208).
+
+
+- [2026-08-06 10:00:00] User requested detailed expenses report in PDF format. Created implementation plan, got approval, modified backend to group by date and category, updated UI table and PDF export format to 5 columns.
+
+
+- [2026-08-06 10:10:00] Fixed missing export functionality for Purchases tab. Added exportPurchasesPdf.ts and wired it into handleExport.
+
+
+- [2026-08-06 10:20:00] Ran clean_reports.py to deduplicate and fix backend/app/api/routes/reports.py. Restored missing Outstanding endpoint signature.
+
+
+- [2026-08-06 10:26:00] Deleted temporary scratch files clean_reports.py and backend/old_reports.py
+

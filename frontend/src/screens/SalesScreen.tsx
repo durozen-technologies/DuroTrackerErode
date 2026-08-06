@@ -4,6 +4,7 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshCon
 import { Plus, Tag, RefreshCcw } from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
 import { fetchSales } from '../api/resources';
+import { formatDisplayDate } from '../utils/dateUtils';
 
 export default function SalesScreen({ navigation }: any) {
   const { data: sales, isLoading, isError, error, refetch, isRefetching } = useQuery({
@@ -62,7 +63,7 @@ export default function SalesScreen({ navigation }: any) {
                 </View>
                 <View className="flex-1">
                   <Text className="font-medium text-content-primary text-base">
-                    {sale.party_name || 'Customer'} · {sale.date}
+                    {sale.party_name || 'Customer'} · {formatDisplayDate(sale.date)}
                   </Text>
                   <Text className="text-xs text-content-tertiary mt-1">
                     {(sale.items || [])

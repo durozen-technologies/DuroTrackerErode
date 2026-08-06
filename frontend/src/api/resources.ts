@@ -43,6 +43,22 @@ export async function fetchItems(lowStock = false): Promise<Item[]> {
   return (await client.get(lowStock ? '/items/?low_stock=true' : '/items/')).data;
 }
 
+export const fetchDetailedPurchases = async (partyId: string, dateFrom?: string, dateTo?: string) => {
+  const params: any = { party_id: partyId };
+  if (dateFrom) params.from = dateFrom;
+  if (dateTo) params.to = dateTo;
+  const { data } = await client.get('/reports/purchases/detailed', { params });
+  return data;
+};
+
+export const fetchDetailedSales = async (partyId: string, dateFrom?: string, dateTo?: string) => {
+  const params: any = { party_id: partyId };
+  if (dateFrom) params.from = dateFrom;
+  if (dateTo) params.to = dateTo;
+  const { data } = await client.get('/reports/sales/detailed', { params });
+  return data;
+};
+
 export async function fetchInventoryReport(): Promise<InventoryReportRow[]> {
   return (await client.get('/reports/inventory')).data;
 }
