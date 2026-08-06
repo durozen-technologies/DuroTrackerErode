@@ -460,3 +460,5 @@
 
 - [2026-08-06 11:06:00] Cleaned up duplicate OutstandingRow model from reports.py.
 
+- [2026-08-06 14:03:14] User requested date pickers in ReportsScreen. Replaced manual TextInputs with DateTimePickers.
+- [2026-08-06 14:07:06] Updated Dashboard date filter chips to 'Today', 'Week', 'Month', 'Custom' with DatePickers.

@@ -601,3 +601,19 @@ User requested to remove the Printed from Broiler 360 footer. Removed from all P
 ### [2026-08-06 11:06:00]
 - Cleaned up duplicate OutstandingRow model from reports.py.
 
+### [2026-08-06 14:03:14]
+- Analyzed 422 errors from dashboard API requests.
+- Replaced manual TextInput fields in ReportsScreen.tsx with native DateTimePicker components to prevent malformed date inputs.
+### [2026-08-06 14:07:06]
+- Updated DashboardScreen chips: Replaced 'Yesterday' with 'Month' and 'Custom'.
+- Added custom date pickers using DateTimePicker to DashboardScreen for 'Custom' range selection.
+### [2026-08-06 14:08:27]
+- Aligned Dashboard chips to divide equal horizontal space by swapping ScrollView for a flex row.
+### [2026-08-06 14:13:15]
+- Removed ChevronRight arrows from the Outstanding balance cards on the Dashboard since they don't redirect anywhere.
+### [2026-08-06 14:15:41]
+- Rebranded app to "Ledger Pro".
+- Updated app.json name, slug, scheme, and adaptiveIcon to point to the new logo.
+- Updated package.json name to ledger-pro.
+- Updated DashboardScreen.tsx top bar title to Ledger Pro.
+- Copied user's WhatsApp image to frontend/assets/icon.png, adaptive-icon.png, and favicon.png.

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Printer } from 'lucide-react-native';
 import { useQueries, useQuery } from '@tanstack/react-query';
@@ -27,6 +28,8 @@ export default function ReportsScreen({ navigation }: any) {
   })();
   const [dateFrom, setDateFrom] = useState(weekAgo);
   const [dateTo, setDateTo] = useState(today);
+  const [showFromPicker, setShowFromPicker] = useState(false);
+  const [showToPicker, setShowToPicker] = useState(false);
   const [exporting, setExporting] = useState(false);
 
   const endpoint = useMemo(() => {
@@ -191,21 +194,47 @@ export default function ReportsScreen({ navigation }: any) {
         <View className="px-4 py-3 bg-surface border-b border-border flex-row gap-2">
           <View className="flex-1">
             <Text className="text-[10px] text-content-tertiary mb-1">From</Text>
-            <TextInput placeholderTextColor="#849CA5"
-              value={dateFrom}
-              onChangeText={setDateFrom}
+            <TouchableOpacity
+              onPress={() => setShowFromPicker(true)}
               accessibilityLabel="From date"
-              className="border border-border rounded-md px-2 py-1.5 text-sm text-content-primary"
-            />
+              className="border border-border rounded-md px-2 py-1.5 bg-canvas justify-center min-h-[32px]"
+            >
+              <Text className="text-sm text-content-primary">{dateFrom}</Text>
+            </TouchableOpacity>
+            {showFromPicker && (
+              <DateTimePicker
+                value={new Date(parseDisplayDateToApi(dateFrom))}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(_, d) => {
+                  setShowFromPicker(Platform.OS === 'ios');
+                  if (d) setDateFrom(formatDisplayDate(toYMD(d)));
+                }}
+                onDismiss={() => setShowFromPicker(false)}
+              />
+            )}
           </View>
           <View className="flex-1">
             <Text className="text-[10px] text-content-tertiary mb-1">To</Text>
-            <TextInput placeholderTextColor="#849CA5"
-              value={dateTo}
-              onChangeText={setDateTo}
+            <TouchableOpacity
+              onPress={() => setShowToPicker(true)}
               accessibilityLabel="To date"
-              className="border border-border rounded-md px-2 py-1.5 text-sm text-content-primary"
-            />
+              className="border border-border rounded-md px-2 py-1.5 bg-canvas justify-center min-h-[32px]"
+            >
+              <Text className="text-sm text-content-primary">{dateTo}</Text>
+            </TouchableOpacity>
+            {showToPicker && (
+              <DateTimePicker
+                value={new Date(parseDisplayDateToApi(dateTo))}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(_, d) => {
+                  setShowToPicker(Platform.OS === 'ios');
+                  if (d) setDateTo(formatDisplayDate(toYMD(d)));
+                }}
+                onDismiss={() => setShowToPicker(false)}
+              />
+            )}
           </View>
         </View>
       )}

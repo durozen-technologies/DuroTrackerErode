@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   TrendingUp,
@@ -8,7 +9,6 @@ import {
   BarChart2,
   Users,
   Truck,
-  ChevronRight,
   FileText,
   Package,
   Tag,
@@ -16,26 +16,36 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { fetchDashboardStats } from '../api/resources';
-import { toLocalYMD as toYMD } from '../utils/dateUtils';
+import { toLocalYMD as toYMD, formatDisplayDate, parseDisplayDateToApi } from '../utils/dateUtils';
 
 
-function rangeFor(chip: 'today' | 'yesterday' | 'week') {
+type ChipType = 'today' | 'week' | 'month' | 'custom';
+
+function rangeFor(chip: 'today' | 'week' | 'month') {
   const today = new Date();
   if (chip === 'today') return { from: toYMD(today), to: toYMD(today) };
-  if (chip === 'yesterday') {
-    const y = new Date(today);
-    y.setDate(y.getDate() - 1);
-    return { from: toYMD(y), to: toYMD(y) };
+  if (chip === 'week') {
+    const from = new Date(today);
+    from.setDate(from.getDate() - 6);
+    return { from: toYMD(from), to: toYMD(today) };
   }
   const from = new Date(today);
-  from.setDate(from.getDate() - 6);
+  from.setDate(from.getDate() - 29);
   return { from: toYMD(from), to: toYMD(today) };
 }
 
 export default function DashboardScreen() {
   const navigation = useNavigation<any>();
-  const [chip, setChip] = useState<'today' | 'yesterday' | 'week'>('today');
-  const range = useMemo(() => rangeFor(chip), [chip]);
+  const [chip, setChip] = useState<ChipType>('today');
+  const [customFrom, setCustomFrom] = useState(formatDisplayDate(toYMD(new Date())));
+  const [customTo, setCustomTo] = useState(formatDisplayDate(toYMD(new Date())));
+  const [showFromPicker, setShowFromPicker] = useState(false);
+  const [showToPicker, setShowToPicker] = useState(false);
+
+  const range = useMemo(() => {
+    if (chip === 'custom') return { from: parseDisplayDateToApi(customFrom), to: parseDisplayDateToApi(customTo) };
+    return rangeFor(chip as any);
+  }, [chip, customFrom, customTo]);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['dashboardStats', range.from, range.to],
@@ -71,16 +81,16 @@ export default function DashboardScreen() {
   const Chip = ({ id, label }: { id: typeof chip; label: string }) => (
     <TouchableOpacity
       onPress={() => setChip(id)}
-      className={`px-5 py-2 rounded-md mr-2 ${chip === id ? 'bg-brand' : 'bg-surface border border-border'}`}
+      className={`flex-1 py-2 rounded-md items-center justify-center ${chip === id ? 'bg-brand' : 'bg-surface border border-border'}`}
     >
-      <Text className={`font-semibold ${chip === id ? 'text-surface' : 'text-content-secondary'}`}>{label}</Text>
+      <Text className={`text-xs font-semibold ${chip === id ? 'text-surface' : 'text-content-secondary'}`}>{label}</Text>
     </TouchableOpacity>
   );
 
   return (
     <View className="flex-1 bg-canvas">
       <View className="flex-row items-center justify-between px-4 py-3 bg-surface border-b border-border">
-        <Text className="text-xl font-bold text-brand">Broiler 360</Text>
+        <Text className="text-xl font-bold text-brand">Ledger Pro</Text>
         <View className="flex-row items-center">
           <TouchableOpacity
             onPress={() => navigation.navigate('Reports')}
@@ -93,11 +103,59 @@ export default function DashboardScreen() {
       </View>
 
       <ScrollView className="flex-1 p-4">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6">
+        <View className="flex-row justify-between gap-2 mb-6">
           <Chip id="today" label="Today" />
-          <Chip id="yesterday" label="Yesterday" />
-          <Chip id="week" label="This Week" />
-        </ScrollView>
+          <Chip id="week" label="Week" />
+          <Chip id="month" label="Month" />
+          <Chip id="custom" label="Custom" />
+        </View>
+
+        {chip === 'custom' && (
+          <View className="flex-row gap-2 mb-6">
+            <View className="flex-1">
+              <Text className="text-[10px] text-content-tertiary mb-1">From</Text>
+              <TouchableOpacity
+                onPress={() => setShowFromPicker(true)}
+                className="bg-surface border border-border rounded-md px-3 py-2 justify-center h-10"
+              >
+                <Text className="text-sm text-content-primary">{customFrom}</Text>
+              </TouchableOpacity>
+              {showFromPicker && (
+                <DateTimePicker
+                  value={new Date(parseDisplayDateToApi(customFrom))}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={(_, d) => {
+                    setShowFromPicker(Platform.OS === 'ios');
+                    if (d) setCustomFrom(formatDisplayDate(toYMD(d)));
+                  }}
+                  onDismiss={() => setShowFromPicker(false)}
+                />
+              )}
+            </View>
+            <View className="flex-1">
+              <Text className="text-[10px] text-content-tertiary mb-1">To</Text>
+              <TouchableOpacity
+                onPress={() => setShowToPicker(true)}
+                className="bg-surface border border-border rounded-md px-3 py-2 justify-center h-10"
+              >
+                <Text className="text-sm text-content-primary">{customTo}</Text>
+              </TouchableOpacity>
+              {showToPicker && (
+                <DateTimePicker
+                  value={new Date(parseDisplayDateToApi(customTo))}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={(_, d) => {
+                    setShowToPicker(Platform.OS === 'ios');
+                    if (d) setCustomTo(formatDisplayDate(toYMD(d)));
+                  }}
+                  onDismiss={() => setShowToPicker(false)}
+                />
+              )}
+            </View>
+          </View>
+        )}
 
         <View className="flex-row flex-wrap justify-between mb-6">
           <View className="w-[48%] bg-surface p-4 rounded-xl border border-border mb-3 h-28 justify-between">
@@ -202,7 +260,6 @@ export default function DashboardScreen() {
                 </Text>
               </View>
             </View>
-            <ChevronRight color="#94A39D" size={20} />
           </View>
           <View className="bg-surface p-3 rounded-xl border border-border flex-row items-center justify-between">
             <View className="flex-row items-center">
@@ -216,7 +273,6 @@ export default function DashboardScreen() {
                 </Text>
               </View>
             </View>
-            <ChevronRight color="#94A39D" size={20} />
           </View>
         </View>
 
