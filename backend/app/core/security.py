@@ -6,7 +6,7 @@ import bcrypt
 from jose import jwt
 from app.core.config import settings
 
-SECRET_KEY = settings.SECRET_KEY or "b40d8905e905d4b998ccb8b0e5bc531c360a0f02377319c5957388cfcf16f05b"
+SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 

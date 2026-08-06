@@ -23,16 +23,30 @@ async def create_or_update_user(username: str, password: str):
             await db.commit()
             print(f"Created new user '{username}'")
 
+async def rename_user(old_username: str, new_username: str):
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(select(User).where(User.username == old_username))
+        user = result.scalar_one_or_none()
+        
+        if user:
+            user.username = new_username
+            await db.commit()
+            print(f"Renamed user '{old_username}' to '{new_username}'")
+        else:
+            print(f"Error: User '{old_username}' does not exist.")
+
 def main():
     parser = argparse.ArgumentParser(description="Manage Admin Users")
-    parser.add_argument("action", choices=["set"], help="Action to perform")
-    parser.add_argument("username", help="Username")
-    parser.add_argument("password", help="Password")
+    parser.add_argument("action", choices=["set", "rename"], help="Action to perform: 'set' to set password or create user, 'rename' to change username")
+    parser.add_argument("username", help="Username (or old username if renaming)")
+    parser.add_argument("password_or_new_username", help="Password (or new username if renaming)")
     
     args = parser.parse_args()
     
     if args.action == "set":
-        asyncio.run(create_or_update_user(args.username, args.password))
+        asyncio.run(create_or_update_user(args.username, args.password_or_new_username))
+    elif args.action == "rename":
+        asyncio.run(rename_user(args.username, args.password_or_new_username))
 
 if __name__ == "__main__":
     main()
