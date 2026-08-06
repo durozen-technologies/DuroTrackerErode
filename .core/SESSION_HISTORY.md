@@ -462,3 +462,5 @@
 
 - [2026-08-06 14:03:14] User requested date pickers in ReportsScreen. Replaced manual TextInputs with DateTimePickers.
 - [2026-08-06 14:07:06] Updated Dashboard date filter chips to 'Today', 'Week', 'Month', 'Custom' with DatePickers.
+- [2026-08-06 14:31:31] Auth implementation complete: added bcrypt JWT backend login, LoginScreen in frontend, and Dashboard logout button.
+- [2026-08-06 14:37:07] Fixed Require Cycle warning by moving AuthContext to its own file.

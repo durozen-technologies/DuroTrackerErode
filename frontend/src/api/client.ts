@@ -1,7 +1,7 @@
 import axios from 'axios';
-// We'll use standard axios instead since react-native-axios is old, actually standard axios works in RN.
 import standardAxios from 'axios';
-import { Platform } from 'react-native';
+import { Platform, DeviceEventEmitter } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // IMPORTANT: Replace this IP with your computer's local IP address (e.g. 192.168.x.x) if testing on a physical device.
 // If testing on Android Emulator, use 10.0.2.2.
@@ -29,5 +29,29 @@ const client = standardAxios.create({
     'Content-Type': 'application/json',
   },
 });
+
+client.interceptors.request.use(async (config) => {
+  try {
+    const token = await AsyncStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (e) {
+    // ignore
+  }
+  return config;
+});
+
+client.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response && error.response.status === 401) {
+      // Token is invalid or expired
+      await AsyncStorage.removeItem('access_token');
+      DeviceEventEmitter.emit('auth:logout');
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default client;

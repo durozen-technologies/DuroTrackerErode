@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import React, { useMemo, useState, useContext } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Platform, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -12,11 +12,13 @@ import {
   FileText,
   Package,
   Tag,
+  LogOut,
 } from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { fetchDashboardStats } from '../api/resources';
 import { toLocalYMD as toYMD, formatDisplayDate, parseDisplayDateToApi } from '../utils/dateUtils';
+import { AuthContext } from '../contexts/AuthContext';
 
 
 type ChipType = 'today' | 'week' | 'month' | 'custom';
@@ -36,6 +38,7 @@ function rangeFor(chip: 'today' | 'week' | 'month') {
 
 export default function DashboardScreen() {
   const navigation = useNavigation<any>();
+  const { logout } = useContext(AuthContext);
   const [chip, setChip] = useState<ChipType>('today');
   const [customFrom, setCustomFrom] = useState(formatDisplayDate(toYMD(new Date())));
   const [customTo, setCustomTo] = useState(formatDisplayDate(toYMD(new Date())));
@@ -91,13 +94,24 @@ export default function DashboardScreen() {
     <View className="flex-1 bg-canvas">
       <View className="flex-row items-center justify-between px-4 py-3 bg-surface border-b border-border">
         <Text className="text-xl font-bold text-brand">Ledger Pro</Text>
-        <View className="flex-row items-center">
+        <View className="flex-row items-center gap-2">
           <TouchableOpacity
             onPress={() => navigation.navigate('Reports')}
             className="flex-row items-center bg-brand-muted px-3 py-1.5 rounded-full"
           >
             <FileText size={18} color="#006269" />
             <Text className="ml-1 text-brand font-semibold text-sm">Reports</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert('Logout', 'Are you sure you want to logout?', [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Logout', style: 'destructive', onPress: logout }
+              ]);
+            }}
+            className="bg-rose-50 w-8 h-8 rounded-full items-center justify-center border border-rose-100"
+          >
+            <LogOut size={16} color="#E11D48" />
           </TouchableOpacity>
         </View>
       </View>
