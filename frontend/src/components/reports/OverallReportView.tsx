@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import type { AggregatedReport } from '../../types';
+import { formatDisplayDate } from '../../utils/dateUtils';
 
 type ExpenseReport = {
-  rows: { key: string; label: string; cash_amount: number; upi_amount: number; total_amount: number }[];
+  rows: { date: string; category_name: string; cash_amount: number; upi_amount: number; total_amount: number }[];
   total_cash: number;
   total_upi: number;
   total_amount: number;
@@ -111,9 +112,9 @@ export function OverallReportView({
       {(expenses?.rows || []).length === 0 ? (
         <Text className="text-sm text-gray-500 mb-4">No expenses in this period.</Text>
       ) : (
-        (expenses?.rows || []).map((row) => (
-          <View key={`e-${row.key}`} className="bg-white border border-gray-200 rounded-xl p-4 mb-3">
-            <Text className="font-bold text-gray-900">{row.label}</Text>
+        (expenses?.rows || []).map((row, i) => (
+          <View key={`e-${i}`} className="bg-white border border-gray-200 rounded-xl p-4 mb-3">
+            <Text className="font-bold text-gray-900">{formatDisplayDate(row.date)} - {row.category_name}</Text>
             <Text className="text-sm text-gray-700">Cash: {money(row.cash_amount)}</Text>
             <Text className="text-sm text-gray-700">UPI: {money(row.upi_amount)}</Text>
             <Text className="text-sm font-semibold text-[#006269]">Total: {money(row.total_amount)}</Text>

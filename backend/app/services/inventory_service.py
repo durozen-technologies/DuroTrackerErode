@@ -54,10 +54,13 @@ class InventoryService:
 
     @staticmethod
     async def revert_purchase_items(db: AsyncSession, items: List[PurchaseItem]):
+        from fastapi import HTTPException
         for p_item in items:
             result = await db.execute(select(Item).where(Item.id == p_item.item_id))
             item = result.scalar_one_or_none()
             if item:
+                if float(item.available_stock) < float(p_item.quantity):
+                    raise HTTPException(status_code=400, detail=f"Cannot edit/delete purchase: would drive stock negative for {item.name_en}")
                 item.available_stock = float(item.available_stock) - float(p_item.quantity)
 
     @staticmethod

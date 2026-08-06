@@ -205,7 +205,11 @@ async def get_party_ledger(
     txns = (
         await db.execute(
             select(PaymentTransaction)
-            .where(PaymentTransaction.party_id == party_id)
+            .where(
+                PaymentTransaction.party_id == party_id,
+                PaymentTransaction.sale_id.is_(None),
+                PaymentTransaction.purchase_id.is_(None)
+            )
             .order_by(PaymentTransaction.date, PaymentTransaction.created_at)
         )
     ).scalars().all()

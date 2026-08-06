@@ -37,7 +37,7 @@ export default function DashboardScreen() {
   const [chip, setChip] = useState<'today' | 'yesterday' | 'week'>('today');
   const range = useMemo(() => rangeFor(chip), [chip]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['dashboardStats', range.from, range.to],
     queryFn: () => fetchDashboardStats(range.from, range.to),
   });
@@ -46,6 +46,14 @@ export default function DashboardScreen() {
     return (
       <View className="flex-1 bg-canvas justify-center items-center">
         <ActivityIndicator size="large" color="#006269" />
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View className="flex-1 bg-canvas justify-center items-center">
+        <Text className="text-red-500 text-base mb-2">Failed to load dashboard data</Text>
       </View>
     );
   }

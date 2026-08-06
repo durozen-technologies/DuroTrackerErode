@@ -81,8 +81,7 @@ async def test_purchase_sale_stock_and_oversell(client: AsyncClient):
             "items": [{"item_id": item["id"], "quantity": 20, "rate": 100}],
         },
     )
-    assert updated.status_code == 200, updated.text
-    assert updated.json()["total_amount"] == 2000
+    assert updated.status_code == 400, updated.text
 
 
 @pytest.mark.api

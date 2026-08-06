@@ -54,7 +54,7 @@ function EntryRow({ entry }: { entry: LedgerEntry }) {
         <Text className="text-sm font-semibold text-brand">
           {isReceived ? 'Payment Received' : 'Payment Made'}
         </Text>
-        <Text className="text-xs text-content-secondary">{entry.date}</Text>
+        <Text className="text-xs text-content-secondary">{formatDisplayDate(entry.date)}</Text>
       </View>
       <Text className="text-base font-bold text-brand mt-1">{formatMoney(entry.total_amount)}</Text>
       <Text className="text-xs text-content-secondary mt-2">

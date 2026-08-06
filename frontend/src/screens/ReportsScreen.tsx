@@ -56,11 +56,11 @@ export default function ReportsScreen({ navigation }: any) {
     const apiFrom = parseDisplayDateToApi(dateFrom);
     const apiTo = parseDisplayDateToApi(dateTo);
     const q = `from=${apiFrom}&to=${apiTo}`;
-    return {
-      purchases: `/reports/purchases?${q}`,
-      sales: `/reports/sales?${q}`,
-      expenses: `/reports/expenses?${q}`,
-    };
+      return {
+        purchases: `/reports/purchases?${q}&group_by=party`,
+        sales: `/reports/sales?${q}&group_by=party`,
+        expenses: `/reports/expenses?${q}`,
+      };
   }, [dateFrom, dateTo]);
 
   const overallQueries = useQueries({
@@ -149,26 +149,24 @@ export default function ReportsScreen({ navigation }: any) {
           <Text className="text-lg font-bold text-content-primary">Reports</Text>
         </View>
         
-        {activeTab !== 'Purchases' && (
-          <TouchableOpacity
-            onPress={handleExport}
-            disabled={exportDisabled}
-            accessibilityRole="button"
-            accessibilityLabel="Export PDF"
-            className={`flex-row items-center px-3 py-1.5 rounded-lg border ${
-              exportDisabled ? 'border-border bg-canvas' : 'border-gray-900 bg-gray-900'
-            }`}
-          >
-            {exporting ? (
-              <ActivityIndicator size="small" color="#9ca3af" />
-            ) : (
-              <Printer size={15} color={exportDisabled ? '#9ca3af' : '#ffffff'} />
-            )}
-            <Text className={`text-xs font-bold ml-1.5 ${exportDisabled ? 'text-gray-400' : 'text-white'}`}>
-              {exporting ? 'Exporting…' : 'Export PDF'}
-            </Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          onPress={handleExport}
+          disabled={exportDisabled}
+          accessibilityRole="button"
+          accessibilityLabel="Export PDF"
+          className={`flex-row items-center px-3 py-1.5 rounded-lg border ${
+            exportDisabled ? 'border-border bg-canvas' : 'border-gray-900 bg-gray-900'
+          }`}
+        >
+          {exporting ? (
+            <ActivityIndicator size="small" color="#9ca3af" />
+          ) : (
+            <Printer size={15} color={exportDisabled ? '#9ca3af' : '#ffffff'} />
+          )}
+          <Text className={`text-xs font-bold ml-1.5 ${exportDisabled ? 'text-gray-400' : 'text-white'}`}>
+            {exporting ? 'Exporting…' : 'Export PDF'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View className="bg-surface border-b border-border">

@@ -184,12 +184,12 @@ export default function NewSaleScreen({ navigation, route }: any) {
         </TouchableOpacity>
         {showDatePicker && (
           <DateTimePicker
-            value={new Date(date)}
+            value={new Date(parseDisplayDateToApi(date))}
             mode="date"
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             onChange={(_, d) => {
               setShowDatePicker(Platform.OS === 'ios');
-              if (d) setDate(toLocalYMD(d));
+              if (d) setDate(formatDisplayDate(toLocalYMD(d)));
             }}
             onDismiss={() => setShowDatePicker(false)}
           />

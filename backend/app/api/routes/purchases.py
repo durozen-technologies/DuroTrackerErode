@@ -151,6 +151,12 @@ async def _apply_purchase(
     total = round(total, 2)
     cash = float(purchase_in.cash_payment or 0)
     upi = float(purchase_in.upi_payment or 0)
+    
+    if cash < 0 or upi < 0:
+        raise HTTPException(status_code=422, detail="Payments cannot be negative")
+    if round(cash + upi, 2) > total:
+        raise HTTPException(status_code=422, detail="Payment exceeds total amount")
+
     balance = round(total - (cash + upi), 2)
     bill_date = purchase_in.date or datetime.now().date()
 

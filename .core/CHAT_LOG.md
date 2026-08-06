@@ -592,3 +592,12 @@ User requested to remove the Printed from Broiler 360 footer. Removed from all P
 - Re-verified frontend components.
 - Updated SESSION_HISTORY.md
 
+
+### [2026-08-06 10:45:00]
+- Fixed 9 audit bugs: Overall API mismatch, blank rows, broken date pickers, hidden PDF export, Dashboard failures, null detailed count, ledger double counts, negative payments, and purchase revert stock guard.
+- All tests (tsc, pytest) passed successfully.
+
+
+### [2026-08-06 11:06:00]
+- Cleaned up duplicate OutstandingRow model from reports.py.
+

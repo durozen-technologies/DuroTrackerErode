@@ -454,3 +454,9 @@
 
 - [2026-08-06 10:26:00] Deleted temporary scratch files clean_reports.py and backend/old_reports.py
 
+
+- [2026-08-06 10:45:00] Fixed 9 audit bugs across UI (Reports, Dashboard, Pickers) and API (Validation, Duplication, Stock Guard).
+
+
+- [2026-08-06 11:06:00] Cleaned up duplicate OutstandingRow model from reports.py.
+
