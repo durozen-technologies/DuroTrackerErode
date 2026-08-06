@@ -46,6 +46,11 @@ jobs:
         working-directory: ./frontend
         run: npm ci || npm install
 
+      - name: Normalize PNG icons (Fix AAPT2 Error)
+        working-directory: ./frontend
+        run: |
+          find assets -type f -iname "*.png" -exec mogrify -strip -interlace none -colorspace sRGB {} +
+
       - name: Expo Prebuild
         working-directory: ./frontend
         run: npx expo prebuild --platform android --clean
