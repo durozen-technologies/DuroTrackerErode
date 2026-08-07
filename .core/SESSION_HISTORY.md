@@ -464,3 +464,21 @@
 - [2026-08-06 14:07:06] Updated Dashboard date filter chips to 'Today', 'Week', 'Month', 'Custom' with DatePickers.
 - [2026-08-06 14:31:31] Auth implementation complete: added bcrypt JWT backend login, LoginScreen in frontend, and Dashboard logout button.
 - [2026-08-06 14:37:07] Fixed Require Cycle warning by moving AuthContext to its own file.
+
+### [2026-08-07 07:49:16] API Deployment Configuration & Cleanup
+- **Request:** Checked for junk files, helped configure Dokploy domains, and tested API deployment.
+- **Actions:**
+  - Deleted temporary script fetch_logs.py from the root folder.
+  - Created a local .env in the root folder with database config.
+  - Guided user through configuring Dokploy domain routing (Port 8000, HTTPS on, Path /).
+  - Verified successful API deployment via Swagger UI.
+  - Attempted to add environment-based Swagger visibility toggle, but reverted code per user request to do it later.
+
+### [2026-08-07 11:39:51] Added Google Apps Script Backup Endpoint
+- **Request:** Create a secure endpoint so Google Apps Script can automatically fetch the database backup and upload it to a personal Google Drive.
+- **Actions:**
+  - Added postgresql-client to Dockerfile.
+  - Added BACKUP_SECRET_KEY to config.py and local .env files.
+  - Passed BACKUP_SECRET_KEY through docker-compose.yml.
+  - Created /api/v1/backup/download endpoint using pg_dump and FileResponse.
+  - Created Google Apps Script code for the user to trigger the download.

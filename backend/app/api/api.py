@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.routes import parties, purchases, sales, dashboard, expenses, items, reports, payments, auth
+from app.api.routes import parties, purchases, sales, dashboard, expenses, items, reports, payments, auth, backup
 
 api_router = APIRouter()
 api_router.include_router(parties.router, prefix="/parties", tags=["parties"])
@@ -11,3 +11,4 @@ api_router.include_router(dashboard.router, prefix="/dashboard", tags=["dashboar
 api_router.include_router(expenses.router, prefix="/expenses", tags=["expenses"])
 api_router.include_router(reports.router, prefix="/reports", tags=["reports"])
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(backup.router, prefix="/backup", tags=["backup"])
